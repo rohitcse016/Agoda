@@ -94,12 +94,24 @@ function Hotels() {
 
   const handleFormSubmit = (values) => {
     const facilities = [{
-      ...values.facility
+      ...values.facility,
+      breakfast: values.facility.breakfast ? 1 : 0,
+      lunch_included: values.facility.lunch_included ? 1 : 0,
+      dinner_included: values.facility.dinner_included ? 1 : 0,
+      pool_access: values.facility.pool_access ? 1 : 0,
+      free_wifi: values.facility.free_wifi ? 1 : 0,
+      premium_wifi: values.facility.premium_wifi ? 1 : 0,
+      parking: values.facility.parking ? 1 : 0,
+      fitness_center_access: values.facility.fitness_center_access ? 1 : 0,
+      welcome_drink: values.facility.welcome_drink ? 1 : 0,
+      beverages: values.facility.beverages ? 1 : 0,
+      image_base64: values?.image_base64
     }];
-    console.log(values);
+    console.log(values?.image_base64, facilities);
     const finalPayload = {
       ...values,
-      facilitiesJson: JSON.stringify(facilities)
+      facilitiesJson: JSON.stringify(facilities),
+      image_base64: ''
     };
 
     if (isEdit && currentHotel) {
@@ -112,21 +124,6 @@ function Hotels() {
     setCurrentHotel(null);
     form.resetFields();
   };
-
-  // const handleImageChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       const base64 = reader.result;
-  //       form.setFieldsValue({
-  //         facility: { ...form.getFieldValue('facility'), image_base64: base64 }
-  //       });
-  //     };
-  //     reader.readAsDataURL(file);
-  //     console.log(reader);
-  //   }
-  // };
   return (
     <div>
       <Tabs
@@ -157,7 +154,23 @@ function Hotels() {
               setIsEdit(true);
               setCurrentHotel(hotel);
               setShowModal(true);
-              form.setFieldsValue(hotel);
+              form.setFieldsValue({
+                ...hotel,
+                facility: {
+                  breakfast: !!hotel.breakfast,
+                  lunch_included: !!hotel.lunch_included,
+                  dinner_included: !!hotel.dinner_included,
+                  parking: !!hotel.parking,
+                  free_wifi: !!hotel.free_wifi,
+                  premium_wifi: !!hotel.premium_wifi,
+                  fitness_center_access: !!hotel.fitness_center_access,
+                  welcome_drink: !!hotel.welcome_drink,
+                  pool_access: !!hotel.pool_access,
+                  beverages: !!hotel.beverages,
+                  additional_info: hotel.additional_info || '',
+                  image_base64: hotel.image_path || ''
+                }
+              });
             }}
             deleteHotel={deleteHotel}
           />
@@ -247,7 +260,7 @@ function Hotels() {
           </Form.Item>
           <Form.Item
             label="Facility Image"
-            name={['facility', 'image_base64']}
+            name='image_base64'
             valuePropName="value"
           >
             <ImageUpload />

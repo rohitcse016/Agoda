@@ -12,7 +12,6 @@ import useFetchData from '../../hooks/useFetchData';
 import ApiService from '../../utils/apiService';
 import { getSessionUser } from '../../utils/authentication';
 import notificationWithIcon from '../../utils/notification';
-import { userStatusAsResponse } from '../../utils/responseAsStatus';
 import QueryOptions from '../shared/QueryOptions';
 
 const { confirm } = Modal;
@@ -21,16 +20,24 @@ function UsersList({ add }) {
   const user = getSessionUser();
   const [fetchAgain, setFetchAgain] = useState(false);
   const [query, setQuery] = useState({
-    search: '', sort: 'asce', page: '1', rows: '10'
+    action_type: 'GET',
+    user_id: null,
+    username: '',
+    email: '',
+    password_hash: '',
+    full_name: '',
+    phone: '',
+    gender: '',
+    dob: null,
+    address: '',
+    role: ''
   });
-
   // fetch user-list API data
-  const [loading, error, response] = useFetchData(`/api/v1/all-users-list?keyword=${query.search}&limit=${query.rows}&page=${query.page}&sort=${query.sort}`, fetchAgain);
-
+  const [loading, error, response] = useFetchData('/employee', fetchAgain, query);
   // reset query options
   useEffect(() => {
     setQuery((prevState) => ({ ...prevState, page: '1' }));
-  }, [query.rows, query.search]);
+  }, [query.rows, query.full_name]);
 
   // function to handle delete user
   const handleDeleteUser = (id) => {
@@ -40,10 +47,10 @@ function UsersList({ add }) {
       content: 'Are you sure delete this User permanently?',
       onOk() {
         return new Promise((resolve, reject) => {
-          ApiService.delete(`/api/v1/delete-user/${id}`)
+          ApiService.post('/employee', { ...query, action_type: 'DELETE', user_id: id })
             .then((res) => {
-              if (res?.result_code === 0) {
-                notificationWithIcon('success', 'SUCCESS', res?.result?.message || 'Room delete successful');
+              if (res?.success) {
+                notificationWithIcon('success', 'SUCCESS', res?.result?.message || 'User delete successful');
                 setFetchAgain(!fetchAgain);
                 resolve();
               } else {
@@ -75,7 +82,7 @@ function UsersList({ add }) {
           />
         ) : (
           <Skeleton loading={loading} paragraph={{ rows: 10 }} active>
-            {response?.data?.rows?.length === 0 ? (
+            {response?.length === 0 ? (
               <Empty
                 className='mt-10'
                 description={(<span>Sorry! Any data was not found.</span>)}
@@ -106,7 +113,7 @@ function UsersList({ add }) {
                           Role
                         </th>
                         <th className='data-table-head-tr-th text-center' scope='col'>
-                          Status
+                          Password
                         </th>
                         <th className='data-table-head-tr-th text-center' scope='col'>
                           Verified
@@ -119,16 +126,16 @@ function UsersList({ add }) {
 
                     {/* data table ― body */}
                     <tbody>
-                      {response?.data?.rows?.map((data) => (
+                      {response && response?.map((data) => (
                         <tr className='data-table-body-tr' key={uniqueId()}>
                           <td className='data-table-body-tr-td text-center'>
                             <Avatar src={data?.avatar} crossOrigin='anonymous' />
                           </td>
                           <td className='data-table-body-tr-td'>
-                            {data?.fullName}
+                            {data?.full_name}
                           </td>
                           <td className='data-table-body-tr-td'>
-                            {data?.userName}
+                            {data?.username}
                           </td>
                           <td className='data-table-body-tr-td !lowercase'>
                             {data?.email}
@@ -139,18 +146,18 @@ function UsersList({ add }) {
                           <td className='data-table-body-tr-td text-center'>
                             <Tag
                               className='w-[60px] text-center uppercase'
-                              color={data?.role === 'admin' ? 'magenta' : 'purple'}
+                              color={data?.UserRole === 'admin' ? 'magenta' : 'purple'}
                             >
-                              {data?.role}
+                              {data?.UserRole}
                             </Tag>
                           </td>
                           <td className='data-table-body-tr-td text-center'>
-                            <Tag
+                            {/* <Tag
                               className='w-[70px] text-center uppercase'
                               color={userStatusAsResponse(data?.status).color}
                             >
-                              {userStatusAsResponse(data?.status).level}
-                            </Tag>
+                            </Tag> */}
+                            {data?.password_hash}
                           </td>
                           <td className='data-table-body-tr-td text-center'>
                             <Tag
@@ -163,16 +170,15 @@ function UsersList({ add }) {
                           <td className='data-table-body-tr-td !px-0 text-center'>
                             <Button
                               className='inline-flex items-center !px-2'
-                              onClick={() => add(data?.id)}
+                              onClick={() => add(data?.user_id)}
                               type='link'
                             >
                               View
                             </Button>
-
-                            {user?.id !== data?.id && (
+                            {user[0]?.UserID !== data?.user_id && (
                               <Button
                                 className='inline-flex items-center !px-2'
-                                onClick={() => handleDeleteUser(data?.id)}
+                                onClick={() => handleDeleteUser(data?.user_id)}
                                 type='link'
                               >
                                 Delete

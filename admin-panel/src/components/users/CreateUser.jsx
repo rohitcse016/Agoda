@@ -24,22 +24,25 @@ function CreateUser() {
   const onFinish = (values) => {
     setLoading(true);
     const data = {
-      userName: values.userName,
-      fullName: values.fullName,
+      action_type: 'ADD',
+      user_id: null,
+      username: values.userName,
+      full_name: values.fullName,
       email: values.email,
       phone: values.phone,
       role: values.role,
       gender: values.gender,
       dob: dayjs(values.dob).format('YYYY-MM-DD'),
       address: values.address,
-      password: values.password
+      password_hash: values.password
     };
 
-    ApiService.post('/api/v1/auth/registration', data)
+    ApiService.post('/employee', data)
       .then((response) => {
+        console.log(response);
         setLoading(false);
-        if (response?.result_code === 0) {
-          notificationWithIcon('success', 'SUCCESS', response?.result?.message || 'New user registration successful');
+        if (response?.success) {
+          notificationWithIcon('success', 'SUCCESS', response?.data[0][0]?.message || 'New user registration successful');
           form.resetFields();
           dispatch(reFetchData());
         } else {

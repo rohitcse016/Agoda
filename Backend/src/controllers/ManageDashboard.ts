@@ -1,46 +1,28 @@
 import { Request, Response } from "express";
 import { getDbConnection } from "../config/db";
 
-export const manageDasboard= async (req: Request, res: Response) => {
-  console.log(req.body)
-  // console.log(res.body)
-  const { 
-    type, 
-    InputValue1 ,
-    InputValue2 
-  } = req.body;
-
+export const manageDasboard = async (req: Request, res: Response) => {
   try {
-    const pool = await getDbConnection();
-    console.log(pool)
-    const result :any = await pool.request()
-      .input("Type", type)
-      .input("InputValue1", InputValue1  || null)
-      .input("InputValue2", InputValue2 || null)
-      .execute("ManageDashboard");
+    const conn = await getDbConnection();
 
-      // console.log("result", result?.recordsets[1])
+    const [results]: any = await conn.query(
+      `CALL sp_dashboard()`
+    );
 
-    const { IsSuccess, Message } =  result?.recordsets[0][0];
+    let data = [];
 
-    let responseData = [];
-
-    if (type == 2 || type == 3 || type ==1) {
-
-      responseData =  result?.recordsets[1];
-    }
-
+    data = results[0];
     res.status(200).json({
-      success: IsSuccess,
-      message: Message,
-      data: responseData,
+      success: true,
+      message: `Fetch Data successful.`,
+      data
     });
 
   } catch (error) {
-    console.error("Error executing sp_ManageDepartment procedure:", error);
+    console.error("Error executing ManageHotelBookings procedure:", error);
     res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: "Internal Server Error"
     });
   }
 };

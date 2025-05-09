@@ -12,6 +12,7 @@ import ManageDashboardRoutes from "./routes/ManageDashboardRoutes";
 import ManageLoginRoutes from "./routes/ManageLoginRoutes";
 import ManageHotelRoutes from "./routes/ManageHotelRoutes";
 import ManageHotelRoomRoutes from "./routes/ManageHotelRoomRoutes";
+import ManageHotelBookingRoutes from "./routes/ManageHotelBookingRoutes";
 const path = require('path');
 
 dotenv.config();
@@ -19,8 +20,10 @@ dotenv.config();
 const app = express();
 
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 
 const swaggerDocument = require("./docs/swagger.json"); 
@@ -32,8 +35,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use("/employee", ManageEmployeeRoutes);
 // app.use("/department", ManageDepartmentRoutes);
 // app.use("/designation", ManageDesignationRoutes);
-// app.use("/dashboard", ManageDashboardRoutes);
+app.use("/dashboard", ManageDashboardRoutes);
 app.use("/hotel", ManageHotelRoutes);
+app.use("/hotelbooking", ManageHotelBookingRoutes);
 app.use("/hotelroom", ManageHotelRoomRoutes);
 app.use("/login", ManageLoginRoutes);
 

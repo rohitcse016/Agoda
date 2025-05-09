@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import ApiService from '../utils/apiService';
 
-const useFetchData = (url, fetchAgain) => {
+const useFetchData = (url, fetchAgain,params) => {
   const reFetch = useSelector((state) => state.app.reFetch);
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,11 +14,11 @@ const useFetchData = (url, fetchAgain) => {
 
   useEffect(() => {
     setLoading(true);
-    ApiService.get(url)
+    ApiService.post(url,params)
       .then((res) => {
         setLoading(false);
-        if (res?.result_code === 0) {
-          setResponse(res?.result);
+        if (res?.success) {
+          setResponse(res?.data[0]);
         } else {
           setError('Sorry! Something went wrong. App server error');
         }

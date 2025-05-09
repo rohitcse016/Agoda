@@ -21,6 +21,7 @@ import { removeSessionAndLogoutUser } from '../utils/authentication';
 import notificationWithIcon from '../utils/notification';
 import Hotels from '../components/tabs/Hotels';
 import Rooms from '../components/tabs/Rooms';
+import MyProfile from '../components/tabs/MyProfile';
 
 const {
   Header, Content, Footer, Sider
@@ -229,7 +230,7 @@ function Main() {
           {selectedKeys === '2' && (<Users />)}
           {selectedKeys === '3' && (<Hotels />)}
           {selectedKeys === '4' && (<Orders />)}
-          {selectedKeys === '5' && (<Rooms />)}
+          {selectedKeys === '5' && (<MyProfile />)}
         </Content>
 
         <Footer className='text-center font-text-font font-medium '>

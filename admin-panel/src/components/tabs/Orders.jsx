@@ -14,16 +14,24 @@ import QueryOptions from '../shared/QueryOptions';
 import RoomStatusUpdateModal from '../shared/RoomStatusUpdateModal';
 
 function Orders() {
-  const [fetchAgain, setFetchAgain] = useState(false);
-  const [query, setQuery] = useState({
-    search: '', sort: 'desc', page: '1', rows: '10'
-  });
+
   const [statusUpdateModal, setStatusUpdateModal] = useState(
     { open: false, roomId: null, status: null }
   );
 
+  const [fetchAgain, setFetchAgain] = useState(false);
+  const [query, setQuery] = useState({
+    action: "GET",
+    booking_id: 0,
+    user_id: 0,
+    room_id: 0,
+    check_in_date: null,
+    check_out_date: null,
+    guests: 1,
+    total_price: 0
+  });
   // fetch booking-list API data
-  const [loading, error, response] = useFetchData(`/api/v1/get-all-booking-orders?keyword=${query.search}&limit=${query.rows}&page=${query.page}&sort=${query.sort}`, fetchAgain);
+  const [loading, error, response] = useFetchData(`/hotelbooking`, fetchAgain,query);
 
   // reset query options
   useEffect(() => {
@@ -80,12 +88,10 @@ function Orders() {
 
                     {/* data table ― body */}
                     <tbody>
-                      {response?.data?.rows?.map((data) => (
+                      {response?.map((data) => (
                         <tr className='data-table-body-tr' key={uniqueId()}>
                           <td className='data-table-body-tr-td'>
-                            {arrayToCommaSeparatedText(data?.booking_dates?.map(
-                              (date) => (date.split('T')[0])
-                            ))}
+                            {data?.booking_date.split('T',1)}
                           </td>
                           <td className='data-table-body-tr-td text-center'>
                             <Tag

@@ -11,11 +11,11 @@ function QueryOptions({ query, setQuery, disabledSearch }) {
     <div className='flex flex-col items-center justify-between space-x-0 space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0'>
       <Input
         className='space-x-4'
-        onChange={(e) => setQuery((prevState) => ({ ...prevState, search: e.target.value }))}
+        onChange={(e) => setQuery((prevState) => ({ ...prevState, full_name: e.target.value }))}
         placeholder='Start type here to Search...'
         prefix={<SearchOutlined />}
         disabled={disabledSearch}
-        value={query.search}
+        value={query.full_name}
         size='large'
         allowClear
       />

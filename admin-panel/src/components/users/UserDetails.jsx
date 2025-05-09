@@ -7,6 +7,7 @@ import {
   Button, Descriptions, Image, Modal, Result, Skeleton, Tag
 } from 'antd';
 import React from 'react';
+import dayjs from 'dayjs';
 import { useDispatch } from 'react-redux';
 import useFetchData from '../../hooks/useFetchData';
 import { reFetchData } from '../../store/slice/appSlice';
@@ -21,8 +22,22 @@ function UserDetails({ id }) {
   const dispatch = useDispatch();
   const user = getSessionUser();
 
+  const param = {
+    action_type: 'GET',
+    user_id: id,
+    username: 'any',
+    email: '',
+    password_hash: 'any',
+    full_name: 'any',
+    phone: '',
+    role: '',
+    gender: '',
+    dob: dayjs().format('YYYY-MM-DD'),
+    address: ''
+  };
   // fetch user-details API data
-  const [loading, error, response] = useFetchData(`/api/v1/get-user/${id}`);
+  const [loading, error, response] = useFetchData('/employee', false, param);
+  // console.log(response&& response[0]);
 
   // function to handle blocked user
   const blockedUser = () => {
@@ -88,11 +103,11 @@ function UserDetails({ id }) {
           subTitle={error}
           status='error'
         />
-      ) : (
+      ) : (response &&
         <Descriptions
           title='User Information'
           bordered
-          extra={user?.id !== id && (response?.data?.status === 'blocked' ? (
+          extra={user?.user_id !== id && (response?.data?.status === 'blocked' ? (
             <Button onClick={unblockedUser} type='default' danger>
               Unblocked User
             </Button>
@@ -114,24 +129,24 @@ function UserDetails({ id }) {
           </Descriptions.Item>
 
           <Descriptions.Item label='Full Name'>
-            {response?.data?.fullName}
+            {response[0]?.full_name}
           </Descriptions.Item>
           <Descriptions.Item label='User Name' span={2}>
-            {response?.data?.userName}
+            {response[0]?.username}
           </Descriptions.Item>
           <Descriptions.Item label='Email'>
-            {response?.data?.email}
+            {response[0]?.email}
           </Descriptions.Item>
           <Descriptions.Item label='Phone' span={2}>
-            {response?.data?.phone}
+            {response[0]?.phone}
           </Descriptions.Item>
 
           <Descriptions.Item label='Role'>
             <Tag
               className='w-[60px] text-center uppercase'
-              color={response?.data?.role === 'admin' ? 'magenta' : 'purple'}
+              color={response[0]?.UserRole === 'admin' ? 'magenta' : 'purple'}
             >
-              {response?.data?.role}
+              {response[0]?.UserRole}
             </Tag>
           </Descriptions.Item>
           <Descriptions.Item label='Status' span={2}>

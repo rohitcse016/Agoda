@@ -10,13 +10,17 @@ export const manageEmployee = async (req: Request, res: Response) => {
     password_hash,
     full_name,
     phone,
+    gender,
+    dob,        // expected in 'YYYY-MM-DD' format
+    address,
+    role        // maps to UserRole
   } = req.body;
 
   try {
     const pool = await getDbConnection();
 
     const [rows] = await pool.query(
-      `CALL sp_manage_users(?, ?, ?, ?, ?, ?, ?)`,
+      `CALL sp_manage_users(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         action_type,
         user_id || null,
@@ -25,12 +29,14 @@ export const manageEmployee = async (req: Request, res: Response) => {
         password_hash || null,
         full_name || null,
         phone || null,
+        gender || null,
+        dob || null,
+        address || null,
+        role || null
       ]
     );
 
-    // MySQL returns result sets in an array
-    const resultSet = rows; 
-    
+    const resultSet = rows;
 
     res.status(200).json({
       success: true,

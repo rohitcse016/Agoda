@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "version": "2.0.0",
-    "title": "CloudAgent Apis",
+    "title": "Agoda Apis",
     "description": "API for Managing queue calls",
     "contact": {
       "name": "API Support",
@@ -52,11 +52,36 @@
                 },
                 "phone": {
                   "example": "any"
+                },
+                "gender": {
+                  "example": "any"
+                },
+                "dob": {
+                  "example": "any"
+                },
+                "address": {
+                  "example": "any"
+                },
+                "role": {
+                  "example": "any"
                 }
               }
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/dashboard/": {
+      "post": {
+        "description": "",
         "responses": {
           "200": {
             "description": "OK"
@@ -104,7 +129,58 @@
                 "star_rating": {
                   "example": "any"
                 },
+                "hotel_price": {
+                  "example": "any"
+                },
                 "facilitiesJson": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/hotelbooking/": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "example": "any"
+                },
+                "booking_id": {
+                  "example": "any"
+                },
+                "user_id": {
+                  "example": "any"
+                },
+                "room_id": {
+                  "example": "any"
+                },
+                "check_in_date": {
+                  "example": "any"
+                },
+                "check_out_date": {
+                  "example": "any"
+                },
+                "guests": {
+                  "example": "any"
+                },
+                "total_price": {
                   "example": "any"
                 }
               }

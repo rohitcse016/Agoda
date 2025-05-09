@@ -48,7 +48,7 @@ export const manageHotels = async (req: Request, res: Response) => {
     const updatedFacilitiesJson = JSON.stringify(facilitiesArray);
 
     const [results]: any = await conn.query(
-      `CALL ManageHotels(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `CALL ManageHotels(?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`,
       [
         action,
         hotel_id ?? null,

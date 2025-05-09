@@ -6,12 +6,11 @@ import { Result } from 'antd';
 import React from 'react';
 import useFetchData from '../../hooks/useFetchData';
 import BookingCard from '../dashboard/BookingCard';
-import RoomCard from '../dashboard/RoomCard';
 import UsersCard from '../dashboard/UsersCard';
 
 function Dashboard() {
   // fetch dashboard API data
-  const [loading, error, response] = useFetchData('/api/v1/dashboard');
+  const [loading, error, response] = useFetchData('/dashboard');
 
   return (
     <div>
@@ -29,17 +28,17 @@ function Dashboard() {
         <div className='flex flex-row flex-wrap items-center justify-between gap-2'>
           <UsersCard
             loading={loading}
-            data={response?.data?.users_info}
+            data={response}
           />
 
-          <RoomCard
+          {/* <RoomCard
             loading={loading}
-            data={response?.data?.rooms_info}
-          />
+            data={response}
+          /> */}
 
           <BookingCard
             loading={loading}
-            data={response?.data?.booking_info}
+            data={response}
           />
         </div>
       )}

@@ -9,7 +9,7 @@ import {
 import ImgCrop from 'antd-img-crop';
 import React, { useState } from 'react';
 import useFetchData from '../../hooks/useFetchData';
-import { getSessionToken, setSessionUserKeyAgainstValue } from '../../utils/authentication';
+import { getSessionToken, getSessionUser, setSessionUserKeyAgainstValue } from '../../utils/authentication';
 import notificationWithIcon from '../../utils/notification';
 import { userStatusAsResponse } from '../../utils/responseAsStatus';
 import ProfileEditModal from '../shared/ProfileEditModal';
@@ -19,7 +19,21 @@ function MyProfile() {
   const [editProfileModal, setEditProfileModal] = useState(false);
 
   // fetch user profile API data
-  const [loading, error, response] = useFetchData('/api/v1/get-user');
+  const [fetchAgain, setFetchAgain] = useState(false);
+  const [query, setQuery] = useState({
+    action_type: "GET",
+    user_id: null,
+    username: "any",
+    email: '',
+    password_hash: "any",
+    full_name: "any",
+    phone: ""
+  });
+
+  // fetch user-list API data
+  const [loading, error, response] = useFetchData(`/employee`, fetchAgain,query);
+  const [user]=getSessionUser();
+  
 
   // handle to change user avatar upload
   const props = {
@@ -73,7 +87,7 @@ function MyProfile() {
               {response?.data?.avatar ? (
                 <Image
                   className='!w-[100px] !h-[100px]'
-                  src={response?.data?.avatar}
+                  src={response?.avatar}
                   crossOrigin='anonymous'
                   alt='user-image'
                 />
@@ -96,16 +110,16 @@ function MyProfile() {
             </Descriptions.Item>
 
             <Descriptions.Item label='Full Name'>
-              {response?.data?.fullName}
+              {response?.full_name}
             </Descriptions.Item>
             <Descriptions.Item label='User Name' span={2}>
-              {response?.data?.userName}
+              {user?.Username}
             </Descriptions.Item>
             <Descriptions.Item label='Email'>
-              {response?.data?.email}
+              {user?.Email}
             </Descriptions.Item>
             <Descriptions.Item label='Phone' span={2}>
-              {response?.data?.phone}
+              {response?.phone}
             </Descriptions.Item>
 
             <Descriptions.Item label='Role'>
