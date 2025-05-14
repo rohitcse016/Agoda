@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 function NotFound() {
-  window.document.title = 'Beach Resort — Error';
+  window.document.title = 'Agoda — Error';
 
   return (
     <div className='h-screen flex flex-col items-center justify-center'>

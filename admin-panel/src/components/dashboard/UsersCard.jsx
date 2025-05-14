@@ -13,7 +13,8 @@ const gridStyle = { width: '25%', textAlign: 'center' };
 function UsersCard({ loading, data }) {
   const navigate = useNavigate();
 
-  return (
+  return (data &&
+    (
     <Card
       className='w-full cursor-pointer md:w-[49.5%]'
       onClick={() => navigate('/main/users')}
@@ -25,7 +26,7 @@ function UsersCard({ loading, data }) {
           className='whitespace-normal lg:whitespace-nowrap'
           title='Total Users'
           formatter={formatter}
-          value={data?.total_users || 0}
+          value={data[0]?.total_users || 0}
         />
       </Card.Grid>
 
@@ -34,7 +35,7 @@ function UsersCard({ loading, data }) {
           className='whitespace-normal lg:whitespace-nowrap'
           title='Admin Role Users'
           formatter={formatter}
-          value={data?.admin_role_user || 0}
+          value={data[0]?.admin_role_user || 0}
         />
       </Card.Grid>
 
@@ -43,7 +44,7 @@ function UsersCard({ loading, data }) {
           className='whitespace-normal lg:whitespace-nowrap'
           title='User Role Users'
           formatter={formatter}
-          value={data?.user_role_user || 0}
+          value={data[0]?.user_role_user || 0}
         />
       </Card.Grid>
 
@@ -52,7 +53,7 @@ function UsersCard({ loading, data }) {
           className='whitespace-normal lg:whitespace-nowrap'
           title='Register Users'
           formatter={formatter}
-          value={data?.register_status_user || 0}
+          value={data[0]?.register_status_user || 0}
         />
       </Card.Grid>
 
@@ -61,7 +62,7 @@ function UsersCard({ loading, data }) {
           className='whitespace-normal lg:whitespace-nowrap'
           title='Login Users'
           formatter={formatter}
-          value={data?.login_status_user || 0}
+          value={data[0]?.login_status_user || 0}
         />
       </Card.Grid>
 
@@ -70,7 +71,7 @@ function UsersCard({ loading, data }) {
           className='whitespace-normal lg:whitespace-nowrap'
           title='Logout Users'
           formatter={formatter}
-          value={data?.logout_status_user || 0}
+          value={data[0]?.logout_status_user || 0}
         />
       </Card.Grid>
 
@@ -79,7 +80,7 @@ function UsersCard({ loading, data }) {
           className='whitespace-normal lg:whitespace-nowrap'
           title='Blocked Users'
           formatter={formatter}
-          value={data?.blocked_status_user || 0}
+          value={data[0]?.blocked_status_user || 0}
         />
       </Card.Grid>
 
@@ -88,10 +89,11 @@ function UsersCard({ loading, data }) {
           className='whitespace-normal lg:whitespace-nowrap'
           title='Verified Users'
           formatter={formatter}
-          value={data?.verified_user || 0}
+          value={data[0]?.verified_user || 0}
         />
       </Card.Grid>
     </Card>
+    )
   );
 }
 

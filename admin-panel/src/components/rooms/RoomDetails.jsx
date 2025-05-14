@@ -5,14 +5,32 @@
 import {
   Descriptions, Image, List, Result, Skeleton, Tag, Typography
 } from 'antd';
-import React from 'react';
+import React, { useState } from 'react';
 import { v4 as uniqueId } from 'uuid';
 import useFetchData from '../../hooks/useFetchData';
 import { roomStatusAsResponse, roomTypeAsColor } from '../../utils/responseAsStatus';
 
-function RoomDetails({ id }) {
-  // fetch room-details API data
-  const [loading, error, response] = useFetchData(`/api/v1/get-room-by-id-or-slug-name/${id}`);
+function RoomDetails({ id, hotel_id }) {
+  
+ 
+   const [query, setQuery] = useState({
+    action: 'GET',
+    room_id: id,
+    hotel_id: hotel_id,
+    room_name: 'any',
+    room_slug: 'any',
+    room_type: '0',
+    room_price: '0',
+    room_size: '0',
+    room_capacity: '0',
+    room_description: 'any',
+    allow_pets: '0',
+    provide_breakfast: '0',
+    featured_room: '0'
+  })
+  
+  const [loading, error, response] = useFetchData(`/hotelroom`, false,query);
+  
 
   return (
     <Skeleton loading={loading} paragraph={{ rows: 10 }} active avatar>
@@ -29,11 +47,11 @@ function RoomDetails({ id }) {
         >
           <Descriptions.Item label='Images' span={3}>
             <Image.PreviewGroup>
-              {response?.data?.room_images?.map((image) => (
+              {response?.images?.map((image) => (
                 <Image
                   key={uniqueId()}
                   className='p-2'
-                  src={image?.url}
+                  src={`http://localhost:5000/${image}`}
                   crossOrigin='anonymous'
                   alt='user-image'
                   width={120}
@@ -60,28 +78,28 @@ function RoomDetails({ id }) {
           >
             <Tag
               className='text-center uppercase'
-              color={roomTypeAsColor(response?.data?.room_type)}
+              color={roomTypeAsColor(response?.room_type)}
             >
-              {response?.data?.room_type}
+              {response?.room_type}
             </Tag>
           </Descriptions.Item>
           <Descriptions.Item
             label={<span className='whitespace-nowrap'>Room Price</span>}
             span={2}
           >
-            {`$ ${response?.data?.room_price}`}
+            {`$ ${response?.room_price}`}
           </Descriptions.Item>
 
           <Descriptions.Item
             label={<span className='whitespace-nowrap'>Room Size</span>}
           >
-            {`${response?.data?.room_size} sq. ft.`}
+            {`${response?.room_size} sq. ft.`}
           </Descriptions.Item>
           <Descriptions.Item
             label={<span className='whitespace-nowrap'>Room Capacity</span>}
             span={2}
           >
-            {`${response?.data?.room_capacity} Person`}
+            {`${response?.room_capacity} Person`}
           </Descriptions.Item>
 
           <Descriptions.Item label={<span className='whitespace-nowrap'>Allow Pets</span>}>
@@ -98,9 +116,9 @@ function RoomDetails({ id }) {
           >
             <Tag
               className='w-[60px] text-center uppercase'
-              color={response?.data?.provide_breakfast ? 'success' : 'error'}
+              color={response?.provide_breakfast ? 'success' : 'error'}
             >
-              {response?.data?.provide_breakfast ? 'YES' : 'NO'}
+              {response?.provide_breakfast ? 'YES' : 'NO'}
             </Tag>
           </Descriptions.Item>
 
@@ -109,9 +127,9 @@ function RoomDetails({ id }) {
           >
             <Tag
               className='w-[60px] text-center uppercase'
-              color={response?.data?.featured_room ? 'success' : 'error'}
+              color={response?.featured_room ? 'success' : 'error'}
             >
-              {response?.data?.featured_room ? 'YES' : 'NO'}
+              {response?.featured_room ? 'YES' : 'NO'}
             </Tag>
           </Descriptions.Item>
           <Descriptions.Item
@@ -120,29 +138,29 @@ function RoomDetails({ id }) {
           >
             <Tag
               className='w-[80px] text-center uppercase'
-              color={roomStatusAsResponse(response?.data?.room_status).color}
+              color={roomStatusAsResponse(response?.room_status).color}
             >
-              {roomStatusAsResponse(response?.data?.room_status).level}
+              {roomStatusAsResponse(response?.room_status).level}
             </Tag>
           </Descriptions.Item>
 
           <Descriptions.Item
             label={<span className='whitespace-nowrap'>Room Last Update At</span>}
           >
-            {response?.data?.updated_at?.split('T')[0]}
+            {response?.updated_at?.split('T')[0]}
           </Descriptions.Item>
           <Descriptions.Item
             label={<span className='whitespace-nowrap'>Room Created At</span>}
             span={2}
           >
-            {response?.data?.created_at?.split('T')[0]}
+            {response?.created_at?.split('T')[0]}
           </Descriptions.Item>
 
           <Descriptions.Item
             label={<span className='whitespace-nowrap'>Room Descriptions</span>}
             span={3}
           >
-            {response?.data?.room_description}
+            {response?.room_description}
           </Descriptions.Item>
           <Descriptions.Item
             label={<span className='whitespace-nowrap'>Extra Facilities</span>}

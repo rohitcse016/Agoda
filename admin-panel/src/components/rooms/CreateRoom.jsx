@@ -12,10 +12,10 @@ import EF from '../../assets/data/extra-facilities.json';
 import { reFetchData } from '../../store/slice/appSlice';
 import ApiService from '../../utils/apiService';
 import notificationWithIcon from '../../utils/notification';
+import ImageUploadMultipart from '../shared/ImageUploadMultipart';
 
-function CreateRoom() {
+function CreateRoom({ hotel_id }) {
   const [loading, setLoading] = useState(false);
-  const [fileList, setFileList] = useState([]);
   const dispatch = useDispatch();
   const [form] = Form.useForm();
 
@@ -25,35 +25,54 @@ function CreateRoom() {
   };
   // function to handle create new room
   const onFinish = (values) => {
+
     console.log(values.room_images);
-    const formdata = new FormData();
-    formdata.append('room_name', values.room_name);
-    formdata.append('room_slug', values.room_slug);
-    formdata.append('room_type', values.room_type);
-    formdata.append('room_price', values.room_price);
-    formdata.append('room_size', values.room_size);
-    formdata.append('room_capacity', values.room_capacity);
-    formdata.append('allow_pets', values?.allow_pets || false);
-    formdata.append('provide_breakfast', values?.provide_breakfast || false);
-    formdata.append('featured_room', values?.featured_room || false);
-    formdata.append('room_description', values.room_description);
+    const formData = new FormData();
+
+      // Append all basic fields
+      formData.append('action', 'ADD');
+      formData.append('room_name', values.room_name);
+      formData.append('room_slug', values.room_slug);
+      formData.append('room_type', values.room_type);
+      formData.append('room_price', values.room_price);
+      formData.append('room_size', values.room_size);
+      formData.append('room_capacity', values.room_capacity);
+      formData.append('allow_pets', values?.allow_pets ? 1 : 0);
+      formData.append('provide_breakfast', values?.provide_breakfast ? 1 : 0);
+      formData.append('featured_room', values?.featured_room ? 1 : 0);
+      formData.append('room_description', values.room_description || '');
+      formData.append('hotel_id',  hotel_id);
+      formData.append('room_id',  '0');
+   
 
     // eslint-disable-next-line no-restricted-syntax
     for (const facilities of values.extra_facilities) {
-      formdata.append('extra_facilities', facilities);
+      formData.append('extra_facilities', facilities);
     }
     // eslint-disable-next-line no-restricted-syntax
-    for (const images of values.room_images) {
-      formdata.append('room_images', images.originFileObj);
+    if (values.room_images && values.room_images.length > 0) {
+      values.room_images.forEach((image, index) => {
+        // Check if image is a File object (new upload) or existing path (string)
+
+        formData.append(`room_images`, image); // Append the actual file
+        if (image instanceof File) {
+          console.log(image);
+        } else if (typeof image === 'string') {
+          // If it's a string, it might be an existing image path
+          formData.append(`existing_images[${index}]`, image);
+        }
+      });
     }
 
+
     setLoading(true);
-    ApiService.post('/api/v1/create-room', formdata, {
+    ApiService.post('/hotelroom', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
       .then((response) => {
+        console.log(response)
         setLoading(false);
-        if (response?.result_code === 0) {
+        if (response?.success) {
           notificationWithIcon('success', 'SUCCESS', response?.result?.message || 'New room create successful');
           form.resetFields();
           dispatch(reFetchData());
@@ -228,33 +247,21 @@ function CreateRoom() {
       </Form.Item>
 
       <Form.Item
-        name='room_images'
-        label='Room Images'
-        valuePropName='fileList'
+        name="room_images"
+        label="Room Images"
+        valuePropName="value"
         getValueFromEvent={normFile}
-        rules={[{
-          required: true,
-          message: 'Please input your Room Images!'
-        }]}
+        rules={[
+          {
+            required: true,
+            validator: (_, value) =>
+              value?.length > 0
+                ? Promise.resolve()
+                : Promise.reject('Please upload at least one image!')
+          }
+        ]}
       >
-        <Upload
-          listType='picture-card'
-          onChange={({ fileList: newFileList }) => setFileList(newFileList)}
-          accept='.jpg,.jpeg,.png,.pdf'
-          beforeUpload={() => false}
-          fileList={fileList}
-          name='room_images'
-          maxCount={5}
-        >
-          {fileList.length >= 5 ? null : (
-            <div>
-              <PlusOutlined />
-              <div style={{ marginTop: 8 }}>
-                Upload
-              </div>
-            </div>
-          )}
-        </Upload>
+        <ImageUploadMultipart />
       </Form.Item>
 
       <div className='flex flex-col items-start justify-start gap-y-2'>

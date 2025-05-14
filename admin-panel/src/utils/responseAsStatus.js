@@ -3,25 +3,26 @@
  */
 
 export const userStatusAsResponse = (status) => {
-  if (status === 'register') {
+  console.log(status);
+  if (status === 1) {
     return {
       color: '#108ee9',
       level: 'REGISTER'
     };
   }
-  if (status === 'login') {
+  if (status === 2) {
     return {
       color: '#87d068',
       level: 'LOGIN'
     };
   }
-  if (status === 'logout') {
+  if (status === 3) {
     return {
       color: '#2db7f5',
       level: 'LOGOUT'
     };
   }
-  if (status === 'blocked') {
+  if (status === 4) {
     return {
       color: '#f55000',
       level: 'BLOCKED'
@@ -75,6 +76,8 @@ export const roomTypeAsColor = (type) => {
 };
 
 export const bookingStatusAsResponse = (status) => {
+  console.log(status);
+  
   if (status === 'pending') {
     return {
       color: 'blue',
@@ -87,10 +90,10 @@ export const bookingStatusAsResponse = (status) => {
       level: 'CANCEL'
     };
   }
-  if (status === 'approved') {
+  if (status === 'confirmed') {
     return {
       color: 'lime',
-      level: 'APPROVED'
+      level: 'CONFIRMED'
     };
   }
   if (status === 'rejected') {

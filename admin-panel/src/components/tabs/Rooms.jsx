@@ -8,8 +8,14 @@ import React, { useRef, useState } from 'react';
 import CreateRoom from '../rooms/CreateRoom';
 import RoomDetails from '../rooms/RoomDetails';
 import RoomsList from '../rooms/RoomsList';
+import { useLocation } from 'react-router-dom';
 
 function Rooms() {
+
+  const location = useLocation();
+   const { params } = location.state || {};
+  console.log(params);
+  
   // function to create new tab pane for room details
   const add = (id) => {
     const newActiveKey = `NewTab1${newTabIndex.current++}`;
@@ -18,7 +24,7 @@ function Rooms() {
       {
         key: newActiveKey,
         label: 'Room Details',
-        children: <RoomDetails id={id} />
+        children: <RoomDetails id={id} hotel_id={params?.hotel_id}  />
       }
     ]);
     setActiveKey(newActiveKey);
@@ -32,7 +38,7 @@ function Rooms() {
       {
         key: newActiveKey,
         label: 'Create Room',
-        children: <CreateRoom />
+        children: <CreateRoom hotel_id={params?.hotel_id} />
       }
     ]);
     setActiveKey(newActiveKey);
@@ -42,7 +48,7 @@ function Rooms() {
   const defaultPanes = new Array(1).fill(null).map((_, index) => ({
     key: String(index + 1),
     label: 'Rooms List',
-    children: <RoomsList add={add} />,
+    children: <RoomsList add={add} hotel_id={params?.hotel_id} />,
     closable: false
   }));
 

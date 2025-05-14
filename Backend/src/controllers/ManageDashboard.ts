@@ -24,5 +24,5 @@ export const manageDasboard = async (req: Request, res: Response) => {
       success: false,
       message: "Internal Server Error"
     });
-  }
+  } 
 };

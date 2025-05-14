@@ -14,34 +14,51 @@ import { reFetchData } from '../../store/slice/appSlice';
 import ApiService from '../../utils/apiService';
 import notificationWithIcon from '../../utils/notification';
 import PageLoader from '../shared/PageLoader';
+import ImageUploadMultipart from '../shared/ImageUploadMultipart';
 
 function RoomEdit({ roomEditModal, setRoomEditModal }) {
   const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState([]);
   const dispatch = useDispatch();
   const [form] = Form.useForm();
+  const params = {
+    "action": "GET",
+    "room_id": roomEditModal?.room_id,
+    hotel_id: roomEditModal?.hotel_id,
+    room_name: 'any',
+    room_slug: 'any',
+    room_type: '0',
+    room_price: '0',
+    room_size: '0',
+    room_capacity: '0',
+    room_description: 'any',
+    allow_pets: '0',
+    provide_breakfast: '0',
+    featured_room: '0'
+  }
+
 
   // fetch room-details API data
-  const [fetchLoading, fetchError, fetchResponse] = useFetchData(
-    `/api/v1/get-room-by-id-or-slug-name/${roomEditModal.roomId}`
-  );
+  const [fetchLoading, fetchError, fetchResponse] = useFetchData('/hotelroom', false, params);
+
+
 
   // set form data from API data
   useEffect(() => {
     if (fetchResponse) {
       form.setFieldsValue({
-        room_name: fetchResponse?.data?.room_name || undefined,
-        room_slug: fetchResponse?.data?.room_slug || undefined,
-        room_type: fetchResponse?.data?.room_type || undefined,
-        room_price: fetchResponse?.data?.room_price || undefined,
-        room_size: fetchResponse?.data?.room_size || undefined,
-        room_capacity: fetchResponse?.data?.room_capacity || undefined,
-        allow_pets: fetchResponse?.data?.allow_pets || false,
-        provide_breakfast: fetchResponse?.data?.provide_breakfast || false,
-        featured_room: fetchResponse?.data?.featured_room || false,
-        room_description: fetchResponse?.data?.room_description || undefined,
-        extra_facilities: fetchResponse?.data?.extra_facilities || undefined,
-        room_images: fetchResponse?.data?.room_images || undefined
+        room_name: fetchResponse?.room_name || undefined,
+        room_slug: fetchResponse?.room_slug || undefined,
+        room_type: fetchResponse?.room_type || undefined,
+        room_price: fetchResponse?.room_price || undefined,
+        room_size: fetchResponse?.room_size || undefined,
+        room_capacity: fetchResponse?.room_capacity || undefined,
+        allow_pets: fetchResponse?.allow_pets,
+        provide_breakfast: fetchResponse?.provide_breakfast,
+        featured_room: fetchResponse?.featured_room,
+        room_description: fetchResponse?.room_description || undefined,
+        extra_facilities: fetchResponse?.extra_facilities || undefined,
+        room_images: fetchResponse?.room_images || undefined
       });
     }
   }, [fetchResponse, form]);
@@ -52,47 +69,77 @@ function RoomEdit({ roomEditModal, setRoomEditModal }) {
   };
 
   // function to handle create new room
-  const onFinish = (values) => {
-    const formdata = new FormData();
-    formdata.append('room_name', values.room_name);
-    formdata.append('room_slug', values.room_slug);
-    formdata.append('room_type', values.room_type);
-    formdata.append('room_price', values.room_price);
-    formdata.append('room_size', values.room_size);
-    formdata.append('room_capacity', values.room_capacity);
-    formdata.append('allow_pets', values?.allow_pets || false);
-    formdata.append('provide_breakfast', values?.provide_breakfast || false);
-    formdata.append('featured_room', values?.featured_room || false);
-    formdata.append('room_description', values.room_description);
+  const onFinish = async (values) => {
+    console.log('Form values:', values);
 
-    // eslint-disable-next-line no-restricted-syntax
-    for (const facilities of values.extra_facilities) {
-      formdata.append('extra_facilities', facilities);
-    }
-    // eslint-disable-next-line no-restricted-syntax
-    for (const images of values.room_images) {
-      formdata.append('room_images', images.originFileObj);
-    }
+    try {
+      const formData = new FormData();
 
-    setLoading(true);
-    ApiService.put(`/api/v1/edit-room/${roomEditModal.roomId}`, formdata, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-      .then((response) => {
-        setLoading(false);
-        if (response?.result_code === 0) {
-          notificationWithIcon('success', 'SUCCESS', response?.result?.message || 'Room updating successful');
-          form.resetFields();
-          dispatch(reFetchData());
-          setRoomEditModal((prevState) => ({ ...prevState, open: false }));
-        } else {
-          notificationWithIcon('error', 'ERROR', 'Sorry! Something went wrong. App server error');
-        }
-      })
-      .catch((err) => {
-        setLoading(false);
-        notificationWithIcon('error', 'ERROR', err?.response?.data?.result?.error?.message || err?.response?.data?.result?.error || 'Sorry! Something went wrong. App server error');
+      // Append all basic fields
+      formData.append('action', 'UPDATE');
+      formData.append('room_name', values.room_name);
+      formData.append('room_slug', values.room_slug);
+      formData.append('room_type', values.room_type);
+      formData.append('room_price', values.room_price);
+      formData.append('room_size', values.room_size);
+      formData.append('room_capacity', values.room_capacity);
+      formData.append('allow_pets', values?.allow_pets ? 1 : 0);
+      formData.append('provide_breakfast', values?.provide_breakfast ? 1 : 0);
+      formData.append('featured_room', values?.featured_room ? 1 : 0);
+      formData.append('room_description', values.room_description || '');
+      formData.append('room_id', roomEditModal?.room_id || '');
+
+      // Append facilities if they exist
+      if (values.extra_facilities) {
+        values.extra_facilities.forEach((facility, index) => {
+          formData.append(`extra_facilities[${index}]`, facility);
+        });
+      }
+
+      // Handle image uploads properly
+      if (values.room_images && values.room_images.length > 0) {
+        values.room_images.forEach((image, index) => {
+          // Check if image is a File object (new upload) or existing path (string)
+          
+          formData.append(`room_images`, image); // Append the actual file
+          if (image instanceof File) {
+            console.log(image);
+          } else if (typeof image === 'string') {
+            // If it's a string, it might be an existing image path
+            formData.append(`existing_images[${index}]`, image);
+          }
+        });
+      }
+
+      setLoading(true);
+      
+
+      const response = await ApiService.post('/hotelroom', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
+
+      setLoading(false);
+
+      if (response?.success) {
+        notificationWithIcon('success', 'SUCCESS', response?.message || 'Room updated successfully');
+        form.resetFields();
+        dispatch(reFetchData());
+        setRoomEditModal(prev => ({ ...prev, open: false }));
+      } else {
+        notificationWithIcon('error', 'ERROR', response?.data?.message || 'Room update failed');
+      }
+    } catch (err) {
+      setLoading(false);
+      console.error('Error updating room:', err);
+
+      const errorMessage = err.response?.data?.message ||
+        err.response?.data?.error?.message ||
+        'Sorry! Something went wrong. Please try again.';
+
+      notificationWithIcon('error', 'ERROR', errorMessage);
+    }
   };
 
   return (
@@ -256,9 +303,10 @@ function RoomEdit({ roomEditModal, setRoomEditModal }) {
             />
           </Form.Item>
 
-          <Form.Item
+          {/* <Form.Item
             label='Extra Facilities'
             name='extra_facilities'
+            // initialValue={'Soft, oversized bath towels'}
             rules={[{
               required: true,
               message: 'Please input your Extra Facilities!'
@@ -272,38 +320,25 @@ function RoomEdit({ roomEditModal, setRoomEditModal }) {
               size='large'
               allowClear
             />
-          </Form.Item>
+          </Form.Item> */}
 
           <Form.Item
-            name='room_images'
-            label='Room Images'
-            valuePropName='fileList'
+            name="room_images"
+            label="Room Images"
+            valuePropName="value"
             getValueFromEvent={normFile}
-            rules={[{
-              required: true,
-              message: 'Please input your Room Images!'
-            }]}
+            rules={[
+              {
+                required: true,
+                validator: (_, value) =>
+                  value?.length > 0
+                    ? Promise.resolve()
+                    : Promise.reject('Please upload at least one image!')
+              }
+            ]}
           >
-            <Upload
-              listType='picture-card'
-              onChange={({ fileList: newFileList }) => setFileList(newFileList)}
-              accept='.jpg,.jpeg,.png,.pdf'
-              beforeUpload={() => false}
-              fileList={fileList}
-              name='room_images'
-              maxCount={5}
-            >
-              {fileList.length >= 5 ? null : (
-                <div>
-                  <PlusOutlined />
-                  <div style={{ marginTop: 8 }}>
-                    Upload
-                  </div>
-                </div>
-              )}
-            </Upload>
+            <ImageUploadMultipart />
           </Form.Item>
-
           <div className='flex flex-col items-start justify-start gap-y-2'>
             <Form.Item name='allow_pets' valuePropName='checked' noStyle>
               <Checkbox className='ml-2.5'>Allow pets?</Checkbox>

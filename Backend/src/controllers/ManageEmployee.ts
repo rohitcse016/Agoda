@@ -13,14 +13,16 @@ export const manageEmployee = async (req: Request, res: Response) => {
     gender,
     dob,        // expected in 'YYYY-MM-DD' format
     address,
-    role        // maps to UserRole
+    role   ,
+    is_Active ,
+    is_Deleted
   } = req.body;
 
   try {
     const pool = await getDbConnection();
 
-    const [rows] = await pool.query(
-      `CALL sp_manage_users(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    const [results]:any = await pool.query(
+      `CALL sp_manage_users(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)`,
       [
         action_type,
         user_id || null,
@@ -32,11 +34,17 @@ export const manageEmployee = async (req: Request, res: Response) => {
         gender || null,
         dob || null,
         address || null,
-        role || null
+        role || null,
+        is_Active || null,
+        is_Deleted || null
       ]
     );
 
-    const resultSet = rows;
+    let resultSet = results;
+    if(action_type=='GET' || action_type=='GET_BY_USER')
+    {
+      resultSet=results[0]
+    }
 
     res.status(200).json({
       success: true,

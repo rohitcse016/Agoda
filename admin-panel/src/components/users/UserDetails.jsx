@@ -33,7 +33,9 @@ function UserDetails({ id }) {
     role: '',
     gender: '',
     dob: dayjs().format('YYYY-MM-DD'),
-    address: ''
+    address: '',
+    isActive: 1,
+    isDeleted: 0
   };
   // fetch user-details API data
   const [loading, error, response] = useFetchData('/employee', false, param);
@@ -47,8 +49,9 @@ function UserDetails({ id }) {
       content: 'Are you sure blocked this user?',
       onOk() {
         return new Promise((resolve, reject) => {
-          ApiService.put(`/api/v1/blocked-user/${id}`)
+          ApiService.post('/employee',{...response[0],action_type:'UPDATE', dob: dayjs(response[0]?.dob).format('YYYY-MM-DD'), isActive:4})
             .then((res) => {
+              console.log(res)
               if (res?.result_code === 0) {
                 notificationWithIcon('success', 'SUCCESS', res?.result?.message || 'User blocked successful');
                 dispatch(reFetchData());
@@ -152,9 +155,9 @@ function UserDetails({ id }) {
           <Descriptions.Item label='Status' span={2}>
             <Tag
               className='w-[70px] text-center uppercase'
-              color={userStatusAsResponse(response?.data?.status).color}
+              color={userStatusAsResponse(response[0]?.isActive).color}
             >
-              {userStatusAsResponse(response?.data?.status).level}
+              {userStatusAsResponse(response[0]?.isActive).level}
             </Tag>
           </Descriptions.Item>
           <Descriptions.Item label='Verified'>
@@ -166,18 +169,18 @@ function UserDetails({ id }) {
             </Tag>
           </Descriptions.Item>
           <Descriptions.Item label='Date Of Birth' span={2}>
-            {response?.data?.dob?.split('T')[0] || 'N/A'}
+            {response[0]?.dob?.split('T')[0] || 'N/A'}
           </Descriptions.Item>
 
           <Descriptions.Item label='User Last Update Date'>
             {response?.data?.updatedAt?.split('T')[0]}
           </Descriptions.Item>
           <Descriptions.Item label='User Registration Date' span={2}>
-            {response?.data?.createdAt?.split('T')[0]}
+            {response[0]?.created_at?.split('T')[0]}
           </Descriptions.Item>
 
           <Descriptions.Item label='Address' span={3}>
-            {response?.data?.address}
+            {response[0]?.address}
           </Descriptions.Item>
         </Descriptions>
       )}

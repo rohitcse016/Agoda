@@ -21,20 +21,18 @@ function MyProfile() {
   // fetch user profile API data
   const [fetchAgain, setFetchAgain] = useState(false);
   const [query, setQuery] = useState({
-    action_type: "GET",
+    action_type: 'GET',
     user_id: null,
-    username: "any",
+    username: '',
     email: '',
-    password_hash: "any",
-    full_name: "any",
-    phone: ""
+    password_hash: '',
+    full_name: '',
+    phone: ''
   });
 
   // fetch user-list API data
-  const [loading, error, response] = useFetchData(`/employee`, fetchAgain,query);
-  const [user]=getSessionUser();
-  
-
+  const [loading, error, response] = useFetchData('/employee', fetchAgain, query);
+  const [user] = getSessionUser();
   // handle to change user avatar upload
   const props = {
     accept: 'image/*',
@@ -68,8 +66,8 @@ function MyProfile() {
             subTitle={error}
             status='error'
           />
-        ) : (
-          <Descriptions
+        ) : (response &&
+          (<Descriptions
             title='My Information'
             bordered
             extra={(
@@ -133,9 +131,9 @@ function MyProfile() {
             <Descriptions.Item label='Status' span={2}>
               <Tag
                 className='w-[70px] text-center uppercase'
-                color={userStatusAsResponse(response?.data?.status).color}
+                color={userStatusAsResponse(response[0]?.isActive).color}
               >
-                {userStatusAsResponse(response?.data?.status).level}
+                {userStatusAsResponse(response[0]?.isActive).level}
               </Tag>
             </Descriptions.Item>
             <Descriptions.Item label='Verified'>
@@ -160,7 +158,7 @@ function MyProfile() {
             <Descriptions.Item label='Address' span={3}>
               {response?.data?.address}
             </Descriptions.Item>
-          </Descriptions>
+          </Descriptions>)
         )}
       </Skeleton>
 

@@ -8,14 +8,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 function Home() {
-  window.document.title = 'Beach Resort — Home';
+  window.document.title = 'Agoda — Home';
 
   return (
     <div className='h-screen flex flex-col items-center justify-center'>
       <Result
         title={(
           <h2 className='text-lg font-text-font font-medium md:text-3xl'>
-            Welcome to Beach Resort Admin Panel!
+            Welcome to Agoda Admin Panel!
           </h2>
         )}
         icon={<SmileOutlined />}

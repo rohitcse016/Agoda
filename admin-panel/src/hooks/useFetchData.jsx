@@ -18,7 +18,7 @@ const useFetchData = (url, fetchAgain,params) => {
       .then((res) => {
         setLoading(false);
         if (res?.success) {
-          setResponse(res?.data[0]);
+          setResponse(res?.data);
         } else {
           setError('Sorry! Something went wrong. App server error');
         }

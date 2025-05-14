@@ -17,19 +17,31 @@ import RoomEdit from './RoomEdit';
 
 const { confirm } = Modal;
 
-function RoomsList({ add }) {
+function RoomsList({ add,hotel_id }) {
   const [query, setQuery] = useState({
-    search: '', sort: 'asce', page: '1', rows: '10'
-  });
+  action: 'GET',
+  room_id: null,
+  hotel_id: hotel_id,
+  room_name: 'any',
+  room_slug: 'any',
+  room_type: '0',
+  room_price: '0',
+  room_size: '0',
+  room_capacity: '0',
+  room_description: 'any',
+  allow_pets: '0',
+  provide_breakfast: '0',
+  featured_room: '0'
+}
+);
   const [roomEditModal, setRoomEditModal] = useState(
-    { open: false, roomId: null }
+    { open: false, room_id: null,hotel_id:null }
   );
   const [fetchAgain, setFetchAgain] = useState(false);
 
   // fetch room-list API data
-  const [loading, error, response] = useFetchData(`/api/v1/all-rooms-list?keyword=${query.search}&limit=${query.rows}&page=${query.page}&sort=${query.sort}`, fetchAgain);
+  const [loading, error, response] = useFetchData(`/hotelroom`, fetchAgain,query);
 
-  // reset query options
   useEffect(() => {
     setQuery((prevState) => ({ ...prevState, page: '1' }));
   }, [query.rows, query.search]);
@@ -42,10 +54,10 @@ function RoomsList({ add }) {
       content: 'Are you sure delete this Room permanently?',
       onOk() {
         return new Promise((resolve, reject) => {
-          ApiService.delete(`/api/v1/delete-room/${id}`)
+          ApiService.delete('/hotelroom')
             .then((res) => {
-              if (res?.result_code === 0) {
-                notificationWithIcon('success', 'SUCCESS', res?.result?.message || 'Room delete successful');
+              if (res?.success) {
+                notificationWithIcon('success', 'SUCCESS', res?.data?.message || 'Room delete successful');
                 setFetchAgain(!fetchAgain);
                 resolve();
               } else {
@@ -115,14 +127,14 @@ function RoomsList({ add }) {
 
                     {/* data table ― body */}
                     <tbody>
-                      {response?.data?.rows?.map((data) => (
+                      {response?.map((data) => (
                         <tr className='data-table-body-tr' key={uniqueId()}>
                           <td className='data-table-body-tr-td'>
                             <Avatar.Group>
-                              {data?.room_images?.map((image) => (
+                              {data?.images?.map((image) => (
                                 <Avatar
                                   key={uniqueId()}
-                                  src={image.url}
+                                  src={`http://localhost:5000/${image}`}
                                   crossOrigin='anonymous'
                                   size='large'
                                 />
@@ -157,7 +169,7 @@ function RoomsList({ add }) {
                           <td className='data-table-body-tr-td !px-0 text-center'>
                             <Button
                               className='inline-flex items-center !px-2'
-                              onClick={() => add(data?.id)}
+                              onClick={() => add(data?.room_id)}
                               type='link'
                             >
                               View
@@ -165,7 +177,7 @@ function RoomsList({ add }) {
                             <Button
                               className='inline-flex items-center !px-2'
                               onClick={() => setRoomEditModal(
-                                (prevState) => ({ ...prevState, open: true, roomId: data?.id })
+                                (prevState) => ({ ...prevState, open: true, room_id: data?.room_id,hotel_id:data?.hotel_id })
                               )}
                               type='link'
                             >

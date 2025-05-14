@@ -64,6 +64,12 @@
                 },
                 "role": {
                   "example": "any"
+                },
+                "is_Active": {
+                  "example": "any"
+                },
+                "is_Deleted": {
+                  "example": "any"
                 }
               }
             }
@@ -168,6 +174,9 @@
                 "user_id": {
                   "example": "any"
                 },
+                "hotel_id": {
+                  "example": "any"
+                },
                 "room_id": {
                   "example": "any"
                 },
@@ -177,10 +186,13 @@
                 "check_out_date": {
                   "example": "any"
                 },
-                "guests": {
+                "guest_count": {
                   "example": "any"
                 },
                 "total_price": {
+                  "example": "any"
+                },
+                "status": {
                   "example": "any"
                 }
               }
@@ -245,6 +257,9 @@
                 },
                 "featured_room": {
                   "example": "any"
+                },
+                "room_paths": {
+                  "example": "any"
                 }
               }
             }
@@ -253,6 +268,9 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "500": {
             "description": "Internal Server Error"

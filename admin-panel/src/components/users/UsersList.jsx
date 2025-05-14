@@ -30,7 +30,9 @@ function UsersList({ add }) {
     gender: '',
     dob: null,
     address: '',
-    role: ''
+    role: '',
+    isActive: 1,
+    isDeleted: 0
   });
   // fetch user-list API data
   const [loading, error, response] = useFetchData('/employee', fetchAgain, query);

@@ -71,6 +71,10 @@ function Main() {
         navigate('/main/profile');
         break;
       }
+      case '7': {
+        navigate('/main/rooms');
+        break;
+      }
       case '6': {
         userLogout();
         break;
@@ -114,6 +118,10 @@ function Main() {
           setSelectedKeys('6');
           break;
         }
+        case 'rooms': {
+          setSelectedKeys('7');
+          break;
+        }
         default: {
           navigate('/not-found');
         }
@@ -124,31 +132,31 @@ function Main() {
   useEffect(() => {
     switch (selectedKeys) {
       case '1': {
-        window.document.title = 'Beach Resort — Dashboard';
+        window.document.title = 'Agoda — Dashboard';
         break;
       }
       case '2': {
-        window.document.title = 'Beach Resort — Users';
+        window.document.title = 'Agoda — Users';
         break;
       }
       case '3': {
-        window.document.title = 'Beach Resort — Hotels';
+        window.document.title = 'Agoda — Hotels';
         break;
       }
       case '4': {
-        window.document.title = 'Beach Resort — Booking Orders';
+        window.document.title = 'Agoda — Booking Orders';
         break;
       }
       case '5': {
-        window.document.title = 'Beach Resort — Profile';
+        window.document.title = 'Agoda — Profile';
         break;
       }
       case '6': {
-        window.document.title = 'Beach Resort — Logout';
+        window.document.title = 'Agoda — Logout';
         break;
       }
       default: {
-        window.document.title = 'Beach Resort — Dashboard';
+        window.document.title = 'Agoda — Dashboard';
       }
     }
   }, [selectedKeys]);
@@ -231,6 +239,7 @@ function Main() {
           {selectedKeys === '3' && (<Hotels />)}
           {selectedKeys === '4' && (<Orders />)}
           {selectedKeys === '5' && (<MyProfile />)}
+          {selectedKeys === '7' && (<Rooms />)}
         </Content>
 
         <Footer className='text-center font-text-font font-medium '>
