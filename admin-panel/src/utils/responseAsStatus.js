@@ -3,7 +3,6 @@
  */
 
 export const userStatusAsResponse = (status) => {
-  console.log(status);
   if (status === 1) {
     return {
       color: '#108ee9',
@@ -35,19 +34,19 @@ export const userStatusAsResponse = (status) => {
 };
 
 export const roomStatusAsResponse = (status) => {
-  if (status === 'available') {
+  if (status === 1) {
     return {
       color: '#87d068',
       level: 'AVAILABLE'
     };
   }
-  if (status === 'unavailable') {
+  if (status === 2) {
     return {
       color: '#f55000',
       level: 'UNAVAILABLE'
     };
   }
-  if (status === 'booked') {
+  if (status === 0) {
     return {
       color: '#2db7f5',
       level: 'BOOKED'
@@ -76,8 +75,6 @@ export const roomTypeAsColor = (type) => {
 };
 
 export const bookingStatusAsResponse = (status) => {
-  console.log(status);
-  
   if (status === 'pending') {
     return {
       color: 'blue',

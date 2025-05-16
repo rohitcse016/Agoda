@@ -258,7 +258,7 @@
                 "featured_room": {
                   "example": "any"
                 },
-                "room_paths": {
+                "is_available": {
                   "example": "any"
                 }
               }
@@ -292,6 +292,270 @@
                   "example": "any"
                 },
                 "Password": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/flightbooking/": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "example": "any"
+                },
+                "user_id": {
+                  "example": "any"
+                },
+                "flight_id": {
+                  "example": "any"
+                },
+                "departure_location": {
+                  "example": "any"
+                },
+                "arrival_location": {
+                  "example": "any"
+                },
+                "departure_date": {
+                  "example": "any"
+                },
+                "return_date": {
+                  "example": "any"
+                },
+                "total_price": {
+                  "example": "any"
+                },
+                "passenger_count": {
+                  "example": "any"
+                },
+                "status": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/busbooking/": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "example": "any"
+                },
+                "user_id": {
+                  "example": "any"
+                },
+                "bus_id": {
+                  "example": "any"
+                },
+                "boarding_point": {
+                  "example": "any"
+                },
+                "dropping_point": {
+                  "example": "any"
+                },
+                "journey_date": {
+                  "example": "any"
+                },
+                "seat_count": {
+                  "example": "any"
+                },
+                "total_price": {
+                  "example": "any"
+                },
+                "status": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/carbooking/": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "example": "any"
+                },
+                "user_id": {
+                  "example": "any"
+                },
+                "car_id": {
+                  "example": "any"
+                },
+                "pickup_location": {
+                  "example": "any"
+                },
+                "dropoff_location": {
+                  "example": "any"
+                },
+                "pickup_date": {
+                  "example": "any"
+                },
+                "dropoff_date": {
+                  "example": "any"
+                },
+                "total_price": {
+                  "example": "any"
+                },
+                "status": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/trainbooking/": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "example": "any"
+                },
+                "booking_id": {
+                  "example": "any"
+                },
+                "user_id": {
+                  "example": "any"
+                },
+                "train_name": {
+                  "example": "any"
+                },
+                "departure_station": {
+                  "example": "any"
+                },
+                "arrival_station": {
+                  "example": "any"
+                },
+                "departure_date": {
+                  "example": "any"
+                },
+                "return_date": {
+                  "example": "any"
+                },
+                "total_price": {
+                  "example": "any"
+                },
+                "status": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/billings/": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "example": "any"
+                },
+                "billing_id": {
+                  "example": "any"
+                },
+                "booking_type": {
+                  "example": "any"
+                },
+                "booking_id": {
+                  "example": "any"
+                },
+                "fare": {
+                  "example": "any"
+                },
+                "taxes": {
+                  "example": "any"
+                },
+                "discount": {
+                  "example": "any"
+                },
+                "total": {
+                  "example": "any"
+                },
+                "payment_method": {
+                  "example": "any"
+                },
+                "transaction_id": {
                   "example": "any"
                 }
               }

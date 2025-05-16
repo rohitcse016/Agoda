@@ -6,6 +6,7 @@ import {
 import ApiService from '../../utils/apiService';
 import HotelList from './Hotel/HotelList';
 import ImageUpload from '../shared/ImageUpload';
+import HotelFilterSidebar from '../dashboard/HotelFilterSidebar';
 
 function Hotels() {
   const [activeKey, setActiveKey] = useState('1');
@@ -31,7 +32,6 @@ function Hotels() {
         star_rating: 0
       };
       const response = await ApiService.post('/hotel', params);
-      console.log(response);
       setHotels(response.data ?? []);
     } catch (error) {
       message.error('Failed to fetch hotels');
@@ -147,34 +147,50 @@ function Hotels() {
         type='editable-card'
         size='large'
       >
-        <Tabs.TabPane key='1' tab='Hotels List'>
-          <HotelList
-            hotels={hotels}
-            editHotel={(hotel) => {
-              setIsEdit(true);
-              setCurrentHotel(hotel);
-              setShowModal(true);
-              form.setFieldsValue({
-                ...hotel,
-                facility: {
-                  breakfast: !!hotel.breakfast,
-                  lunch_included: !!hotel.lunch_included,
-                  dinner_included: !!hotel.dinner_included,
-                  parking: !!hotel.parking,
-                  free_wifi: !!hotel.free_wifi,
-                  premium_wifi: !!hotel.premium_wifi,
-                  fitness_center_access: !!hotel.fitness_center_access,
-                  welcome_drink: !!hotel.welcome_drink,
-                  pool_access: !!hotel.pool_access,
-                  beverages: !!hotel.beverages,
-                  additional_info: hotel.additional_info || '',
-                  image_base64: hotel.image_path || ''
-                }
-              });
-            }}
-            deleteHotel={deleteHotel}
-          />
+        <Tabs.TabPane key="1" tab="Hotels List">
+          <div className="flex gap-4">
+            {/* Sidebar on the left */}
+            <div className="w-72 shrink-0">
+              <HotelFilterSidebar
+                onChange={(filters) => {
+                  // handle filter logic or pass to parent
+                  console.log('Filters changed:', filters);
+                }}
+              />
+            </div>
+
+            {/* Hotel list on the right */}
+            <div className="flex-1">
+              <HotelList
+                hotels={hotels}
+                editHotel={(hotel) => {
+                  setIsEdit(true);
+                  setCurrentHotel(hotel);
+                  setShowModal(true);
+                  form.setFieldsValue({
+                    ...hotel,
+                    facility: {
+                      breakfast: !!hotel.breakfast,
+                      lunch_included: !!hotel.lunch_included,
+                      dinner_included: !!hotel.dinner_included,
+                      parking: !!hotel.parking,
+                      free_wifi: !!hotel.free_wifi,
+                      premium_wifi: !!hotel.premium_wifi,
+                      fitness_center_access: !!hotel.fitness_center_access,
+                      welcome_drink: !!hotel.welcome_drink,
+                      pool_access: !!hotel.pool_access,
+                      beverages: !!hotel.beverages,
+                      additional_info: hotel.additional_info || '',
+                      image_base64: hotel.image_path || ''
+                    }
+                  });
+                }}
+                deleteHotel={deleteHotel}
+              />
+            </div>
+          </div>
         </Tabs.TabPane>
+
       </Tabs>
 
       <Modal

@@ -2,13 +2,11 @@
  * @author Rohit Kumar
  */
 
-import { PlusOutlined } from '@ant-design/icons';
 import {
-  Button, Checkbox, Form, Input, InputNumber, Modal, Result, Select, Upload
+  Button, Checkbox, Col, Form, Input, InputNumber, Modal, Result, Row, Select
 } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import EF from '../../assets/data/extra-facilities.json';
 import useFetchData from '../../hooks/useFetchData';
 import { reFetchData } from '../../store/slice/appSlice';
 import ApiService from '../../utils/apiService';
@@ -18,8 +16,12 @@ import ImageUploadMultipart from '../shared/ImageUploadMultipart';
 
 function RoomEdit({ roomEditModal, setRoomEditModal }) {
   const [loading, setLoading] = useState(false);
-  const [fileList, setFileList] = useState([]);
   const dispatch = useDispatch();
+  const availOptions = [
+    { "label": 'Booked', "value": 0 },
+    { label: 'Available', value: 1 },
+    { label: 'Unavailable', value: 2 }
+  ]
   const [form] = Form.useForm();
   const params = {
     "action": "GET",
@@ -58,6 +60,7 @@ function RoomEdit({ roomEditModal, setRoomEditModal }) {
         featured_room: fetchResponse?.featured_room,
         room_description: fetchResponse?.room_description || undefined,
         extra_facilities: fetchResponse?.extra_facilities || undefined,
+        is_available: fetchResponse?.is_available || undefined,
         room_images: fetchResponse?.room_images || undefined
       });
     }
@@ -88,6 +91,7 @@ function RoomEdit({ roomEditModal, setRoomEditModal }) {
       formData.append('featured_room', values?.featured_room ? 1 : 0);
       formData.append('room_description', values.room_description || '');
       formData.append('room_id', roomEditModal?.room_id || '');
+      formData.append('is_available', values?.is_available);
 
       // Append facilities if they exist
       if (values.extra_facilities) {
@@ -100,19 +104,19 @@ function RoomEdit({ roomEditModal, setRoomEditModal }) {
       if (values.room_images && values.room_images.length > 0) {
         values.room_images.forEach((image, index) => {
           // Check if image is a File object (new upload) or existing path (string)
-          
+
           formData.append(`room_images`, image); // Append the actual file
           if (image instanceof File) {
             console.log(image);
           } else if (typeof image === 'string') {
             // If it's a string, it might be an existing image path
-            formData.append(`existing_images[${index}]`, image);
+            formData.append(`room_images`, image);
           }
         });
       }
 
       setLoading(true);
-      
+
 
       const response = await ApiService.post('/hotelroom', formData, {
         headers: {
@@ -249,45 +253,71 @@ function RoomEdit({ roomEditModal, setRoomEditModal }) {
             </Form.Item>
           </div>
 
-          <div className='two-grid-column'>
-            <Form.Item
-              className='w-full md:w-1/2'
-              label='Room Size'
-              name='room_size'
-              rules={[{
-                required: true,
-                message: 'Please input your Room Size!'
-              }]}
-            >
-              <InputNumber
-                className='w-full'
-                placeholder='Room Size'
-                type='number'
-                size='large'
-                min={1}
-                max={1000}
-              />
-            </Form.Item>
+          
+          <Row gutter={8}>
+            <Col span={16}>
+            <div className='two-grid-column'>
+              <Form.Item
+                className='w-full md:w-1/2'
+                label='Room Size'
+                name='room_size'
+                rules={[{
+                  required: true,
+                  message: 'Please input your Room Size!'
+                }]}
+              >
+                <InputNumber style={{width:'100%'}}
+                  className='w-full'
+                  placeholder='Room Size'
+                  type='number'
+                  size='large'
+                  min={1}
+                  max={1000}
+                />
+              </Form.Item>
+               <Form.Item
+                className='w-full md:w-1/2'
+                label='Room Capacity'
+                name='room_capacity'
+                rules={[{
+                  required: true,
+                  message: 'Please input your Room Capacity!'
+                }]}
+              >
+                <InputNumber
+                  className='w-full'
+                  placeholder='Room Capacity'
+                  type='number'
+                  size='large'
+                  min={1}
+                  max={10}
+                />
+              </Form.Item>
+              
+            </div>
 
+              </Col>
+            <Col  span={8}>
             <Form.Item
-              className='w-full md:w-1/2'
-              label='Room Capacity'
-              name='room_capacity'
-              rules={[{
-                required: true,
-                message: 'Please input your Room Capacity!'
-              }]}
-            >
-              <InputNumber
-                className='w-full'
-                placeholder='Room Capacity'
-                type='number'
-                size='large'
-                min={1}
-                max={10}
-              />
-            </Form.Item>
-          </div>
+                label='Availability'
+                name='is_available'
+                // initialValue={'Soft, oversized bath towels'}
+                rules={[{
+                  required: true,
+                  message: 'Please Select Availability'
+                }]}
+              >
+                <Select
+                  placeholder='-- select Availability --'
+                  optionFilterProp='children'
+                  options={availOptions}
+                  size='large'
+                  allowClear
+                />
+              </Form.Item>
+
+            </Col>
+          </Row>
 
           <Form.Item
             label='Room Description'
@@ -302,6 +332,7 @@ function RoomEdit({ roomEditModal, setRoomEditModal }) {
               rows={4}
             />
           </Form.Item>
+
 
           {/* <Form.Item
             label='Extra Facilities'
@@ -329,11 +360,11 @@ function RoomEdit({ roomEditModal, setRoomEditModal }) {
             getValueFromEvent={normFile}
             rules={[
               {
-                required: true,
-                validator: (_, value) =>
-                  value?.length > 0
-                    ? Promise.resolve()
-                    : Promise.reject('Please upload at least one image!')
+                required: false,
+                // validator: (_, value) =>
+                //   value?.length > 0
+                //     ? Promise.resolve()
+                //     : Promise.reject('Please upload at least one image!')
               }
             ]}
           >

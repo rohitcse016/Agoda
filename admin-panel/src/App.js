@@ -22,6 +22,7 @@ function App() {
 
         {/* LOGIN ROUTE */}
         <Route path='/auth/login' element={(<PublicRoute><Login /></PublicRoute>)} />
+        {/* <Route path='/main/payment' element={<PaymentComponent/>} /> */}
 
         {/* ERROR ROUTE */}
         <Route path='*' element={<NotFound />} />

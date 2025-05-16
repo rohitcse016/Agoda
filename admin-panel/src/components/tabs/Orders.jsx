@@ -9,6 +9,9 @@ import useFetchData from '../../hooks/useFetchData';
 import { bookingStatusAsResponse } from '../../utils/responseAsStatus';
 import QueryOptions from '../shared/QueryOptions';
 import RoomStatusUpdateModal from '../shared/RoomStatusUpdateModal';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
 
 function Orders() {
   const [statusUpdateModal, setStatusUpdateModal] = useState({ open: false, roomId: null, status: null });
@@ -34,10 +37,76 @@ function Orders() {
     setQuery((prevState) => ({ ...prevState, page: '1' }));
   }, [query.rows, query.search]);
 
+  const exportCSV = () => {
+  if (!response || !response.length) return;
+
+  const headers = [
+    'Booking Date', 'Check-In', 'Check-Out', 'Status',
+    'Full Name', 'Room', 'Price', 'Guests', 'Rating'
+  ];
+
+  const rows = response.map(data => [
+    data?.booking_date?.split('T')[0],
+    data?.check_in_date?.split('T')[0],
+    data?.check_out_date?.split('T')[0],
+    bookingStatusAsResponse(data?.status)?.level ?? '',
+    data?.full_name ?? '',
+    data?.room_name ?? '',
+    data?.total_price ?? '',
+    data?.guest_count ?? '',
+    data?.reviews?.rating ?? 'N/A',
+  ]);
+
+  const csvContent = [headers, ...rows].map(e => e.join(',')).join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.setAttribute('download', 'hotel_bookings.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+const exportPDF = () => {
+  if (!response || !response.length) return;
+
+  const doc = new jsPDF();
+  doc.text('Hotel Booking Report', 14, 15);
+
+  const tableData = response.map(data => [
+    data?.booking_date?.split('T')[0],
+    data?.check_in_date?.split('T')[0],
+    data?.check_out_date?.split('T')[0],
+    bookingStatusAsResponse(data?.status)?.level ?? '',
+    data?.full_name ?? '',
+    data?.room_name ?? '',
+    data?.total_price ?? '',
+    data?.guest_count ?? '',
+    data?.reviews?.rating ?? 'N/A',
+  ]);
+
+  autoTable(doc, {
+    startY: 20,
+    head: [[
+      'Booking Date', 'Check-In', 'Check-Out', 'Status',
+      'Full Name', 'Room', 'Price', 'Guests', 'Rating'
+    ]],
+    body: tableData,
+  });
+
+  doc.save('hotel_bookings.pdf');
+};
+
+
   return (
     <div>
       {/* booking list ― query section */}
       <QueryOptions query={query} setQuery={setQuery} disabledSearch />
+      <div className="mb-4 flex gap-2 justify-end">
+        <Button type="primary" onClick={exportCSV}>Export CSV</Button>
+        <Button danger type="primary" onClick={exportPDF}>Export PDF</Button>
+      </div>
+
 
       {/* room list ― content section */}
       <div className='w-full flex flex-row flex-wrap items-center justify-center gap-2'>
@@ -58,6 +127,12 @@ function Orders() {
                           Booking Dates
                         </th>
                         <th className='data-table-head-tr-th' scope='col'>
+                          From
+                        </th>
+                        <th className='data-table-head-tr-th' scope='col'>
+                          To
+                        </th>
+                        <th className='data-table-head-tr-th' scope='col'>
                           Booking Status
                         </th>
                         <th className='data-table-head-tr-th text-center' scope='col'>
@@ -67,7 +142,13 @@ function Orders() {
                           Booked Room
                         </th>
                         <th className='data-table-head-tr-th text-center' scope='col'>
-                          Review & Ratting
+                          Price
+                        </th>
+                        <th className='data-table-head-tr-th text-center' scope='col'>
+                          No of Persons
+                        </th>
+                        <th className='data-table-head-tr-th text-center' scope='col'>
+                          Ratings
                         </th>
                         <th className='data-table-head-tr-th text-center' scope='col'>
                           Booking Actions
@@ -80,18 +161,22 @@ function Orders() {
                       {response?.map((data) => (
                         <tr className='data-table-body-tr' key={uniqueId()}>
                           <td className='data-table-body-tr-td'>{data?.booking_date.split('T', 1)}</td>
+                          <td className='data-table-body-tr-td'>{data?.check_in_date.split('T', 1)}</td>
+                          <td className='data-table-body-tr-td'>{data?.check_out_date.split('T', 1)}</td>
                           <td className='data-table-body-tr-td text-center'>
                             <Tag className='w-[100px] text-center uppercase' color={bookingStatusAsResponse(data?.status).color}>
                               {bookingStatusAsResponse(data?.status).level}
                             </Tag>
                           </td>
-                          <td className='data-table-body-tr-td'>{data?.booking_by?.full_name}</td>
-                          <td className='data-table-body-tr-td'>{data?.room?.room_name}</td>
+                          <td className='data-table-body-tr-td'>{data?.full_name}</td>
+                          <td className='data-table-body-tr-td'>{data?.room_name}</td>
+                          <td className='data-table-body-tr-td'>{data?.total_price}</td>
+                          <td className='data-table-body-tr-td'>{data?.guest_count}</td>
                           <Tooltip title={data?.reviews?.message} placement='top' trigger='hover'>
-                            <td className='data-table-body-tr-td text-center'>{data?.reviews ? <Rate value={data?.reviews?.rating} disabled /> : 'N/A'}</td>
+                            <td className='data-table-body-tr-td text-center'>{<Rate value={4} disabled />}</td>
                           </Tooltip>
                           <td className='data-table-body-tr-td !px-0 text-center'>
-                            {data?.status !== 'cancel' && data?.status !== 'rejected' && data?.status !== 'in-reviews' && data?.status !== 'completed' ? (
+                            {data?.status == 'cancel' && data?.status !== 'rejected' && data?.status !== 'in-reviews' && data?.status !== 'completed' ? (
                               <Button
                                 className='inline-flex items-center !px-2'
                                 type='primary'
@@ -106,9 +191,10 @@ function Orders() {
                               >
                                 Update Status
                               </Button>
-                            ) : (
-                              'Action Not Possible!'
-                            )}
+                            )
+                              : (
+                                'NA'
+                              )}
                           </td>
                         </tr>
                       ))}

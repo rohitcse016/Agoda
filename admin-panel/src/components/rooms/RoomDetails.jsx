@@ -3,14 +3,18 @@
  */
 
 import {
-  Descriptions, Image, List, Result, Skeleton, Tag, Typography
+  Button,
+  Descriptions, Image, List, Result, Row, Skeleton, Tag, Typography
 } from 'antd';
 import React, { useState } from 'react';
 import { v4 as uniqueId } from 'uuid';
 import useFetchData from '../../hooks/useFetchData';
 import { roomStatusAsResponse, roomTypeAsColor } from '../../utils/responseAsStatus';
+import { useNavigate } from 'react-router-dom';
 
 function RoomDetails({ id, hotel_id }) {
+  
+  const navigate=useNavigate();
   
  
    const [query, setQuery] = useState({
@@ -178,6 +182,11 @@ function RoomDetails({ id, hotel_id }) {
           </Descriptions.Item>
         </Descriptions>
       )}
+     {/* <Row style={{alignItems:'center',}}>
+       <Button type="primary" size={20} onClick={()=>navigate('/main/payment')}>
+            Book Now
+          </Button>
+     </Row> */}
     </Skeleton>
   );
 }

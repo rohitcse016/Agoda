@@ -3,7 +3,10 @@
  */
 
 import {
-  DashboardOutlined, FileProtectOutlined, FullscreenExitOutlined, FullscreenOutlined, HomeOutlined, LogoutOutlined, TeamOutlined, UserOutlined
+  DashboardOutlined, FileProtectOutlined, FullscreenExitOutlined, FullscreenOutlined, HomeOutlined, LogoutOutlined,
+  RocketOutlined, TeamOutlined, UserOutlined,InsertRowLeftOutlined,
+  CarOutlined,
+  RadarChartOutlined
 } from '@ant-design/icons';
 import {
   Button, Layout, Menu, Tooltip
@@ -22,6 +25,10 @@ import notificationWithIcon from '../utils/notification';
 import Hotels from '../components/tabs/Hotels';
 import Rooms from '../components/tabs/Rooms';
 import MyProfile from '../components/tabs/MyProfile';
+import FlightBookingHistory from '../components/tabs/FlightBookingHistory';
+import BusBookingHistory from '../components/tabs/BusBookingHistory';
+import CarBookingHistory from '../components/tabs/CarBookingHistory';
+import TrainBookingHistory from '../components/tabs/TrainBookingHistory';
 
 const {
   Header, Content, Footer, Sider
@@ -40,11 +47,11 @@ function Main() {
       if (response?.result_code === 0) {
         removeSessionAndLogoutUser();
       } else {
-        notificationWithIcon('error', 'ERROR', 'Sorry! Something went wrong. App server error');
+        // notificationWithIcon('error', 'ERROR', 'Sorry! Something went wrong. App server error');
         removeSessionAndLogoutUser();
       }
     } catch (error) {
-      notificationWithIcon('error', 'ERROR', error?.response?.data?.result?.error || 'Sorry! Something went wrong. App server error');
+      // notificationWithIcon('error', 'ERROR', error?.response?.data?.result?.error || 'Sorry! Something went wrong. App server error');
       removeSessionAndLogoutUser();
     }
   };
@@ -71,8 +78,20 @@ function Main() {
         navigate('/main/profile');
         break;
       }
-      case '7': {
-        navigate('/main/rooms');
+      case '8': {
+        navigate('/main/flight-orders');
+        break;
+      }
+      case '9': {
+        navigate('/main/bus-orders');
+        break;
+      }
+      case '10': {
+        navigate('/main/car-orders');
+        break;
+      }
+      case '11': {
+        navigate('/main/train-orders');
         break;
       }
       case '6': {
@@ -122,6 +141,22 @@ function Main() {
           setSelectedKeys('7');
           break;
         }
+        case 'flight-orders': {
+          setSelectedKeys('8');
+          break;
+        }
+        case 'bus-orders': {
+          setSelectedKeys('9');
+          break;
+        }
+        case 'car-orders': {
+          setSelectedKeys('10');
+          break;
+        }
+        case 'train-orders': {
+          setSelectedKeys('11');
+          break;
+        }
         default: {
           navigate('/not-found');
         }
@@ -153,6 +188,10 @@ function Main() {
       }
       case '6': {
         window.document.title = 'Agoda — Logout';
+        break;
+      }
+      case '7': {
+        window.document.title = 'Flight — Orders';
         break;
       }
       default: {
@@ -193,6 +232,26 @@ function Main() {
               key: '4',
               icon: <FileProtectOutlined />,
               label: 'Booking Orders'
+            },
+            {
+              key: '8',
+              icon: <RocketOutlined />,
+              label: 'Flight Booking Orders'
+            },
+            {
+              key: '9',
+              icon: <InsertRowLeftOutlined />,
+              label: 'Bus Booking Orders'
+            },
+            {
+              key: '10',
+              icon: <CarOutlined />,
+              label: 'Car Booking Orders'
+            },
+            {
+              key: '11',
+              icon: <RadarChartOutlined />,
+              label: 'Train Booking Orders'
             },
             {
               key: '5',
@@ -240,6 +299,10 @@ function Main() {
           {selectedKeys === '4' && (<Orders />)}
           {selectedKeys === '5' && (<MyProfile />)}
           {selectedKeys === '7' && (<Rooms />)}
+          {selectedKeys === '8' && (<FlightBookingHistory />)}
+          {selectedKeys === '9' && (<BusBookingHistory />)}
+          {selectedKeys === '10' && (<CarBookingHistory />)}
+          {selectedKeys === '11' && (<TrainBookingHistory />)}
         </Content>
 
         <Footer className='text-center font-text-font font-medium '>

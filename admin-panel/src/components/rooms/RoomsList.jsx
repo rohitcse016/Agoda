@@ -54,7 +54,7 @@ function RoomsList({ add,hotel_id }) {
       content: 'Are you sure delete this Room permanently?',
       onOk() {
         return new Promise((resolve, reject) => {
-          ApiService.delete('/hotelroom')
+          ApiService.post('/hotelroom',{...query,action:'DELETE',room_id:id})
             .then((res) => {
               if (res?.success) {
                 notificationWithIcon('success', 'SUCCESS', res?.data?.message || 'Room delete successful');
@@ -161,9 +161,9 @@ function RoomsList({ add,hotel_id }) {
                           <td className='data-table-body-tr-td text-center'>
                             <Tag
                               className='w-[80px] text-center uppercase'
-                              color={roomStatusAsResponse(data?.room_status).color}
+                              color={roomStatusAsResponse(data?.is_available).color}
                             >
-                              {roomStatusAsResponse(data?.room_status).level}
+                              {roomStatusAsResponse(data?.is_available).level}
                             </Tag>
                           </td>
                           <td className='data-table-body-tr-td !px-0 text-center'>
@@ -185,7 +185,7 @@ function RoomsList({ add,hotel_id }) {
                             </Button>
                             <Button
                               className='inline-flex items-center !px-2'
-                              onClick={() => handleDeleteRoom(data?.id)}
+                              onClick={() => handleDeleteRoom(data?.room_id)}
                               type='link'
                             >
                               Delete

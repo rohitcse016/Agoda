@@ -40,41 +40,61 @@ export const manageRooms = async (req: Request, res: Response) => {
       console.error('File upload error:', err);
       return res.status(400).json({
         success: false,
-        message: err instanceof multer.MulterError 
-          ? `File upload error: ${err.message}` 
+        message: err instanceof multer.MulterError
+          ? `File upload error: ${err.message}`
           : err.message
       });
     }
 
+    const {
+      action,
+      room_id,
+      hotel_id,
+      room_name,
+      room_slug,
+      room_type,
+      room_price,
+      room_size,
+      room_capacity,
+      room_description,
+      allow_pets,
+      provide_breakfast,
+      featured_room,
+      is_available
+    } = req.body;
+
+    const files = req.files as Express.Multer.File[];
+    const imagePaths = files?.map(file =>
+      path.relative(path.join(__dirname, './..'), file.path)
+    ) || [];
+
     try {
-      const {
-        action,
-        room_id,
-        hotel_id,
-        room_name,
-        room_slug,
-        room_type,
-        room_price,
-        room_size,
-        room_capacity,
-        room_description,
-        allow_pets,
-        provide_breakfast,
-        featured_room
-      } = req.body;
-
-      // Get uploaded files
-      const files = req.files as Express.Multer.File[];
-      const imagePaths = files?.map(file => 
-        path.relative(path.join(__dirname, './..'), file.path)
-      ) || [];
-
       const conn = await getDbConnection();
 
-      // Note: Fixed typo in procedure name (was CALL Sp_ManageRooms)
-      
+      // 🔥 If deleting, fetch image paths before deletion
+      if (action === 'DELETE' && room_id) {
+        const [roomResult]: any = await conn.query(
+          `SELECT image_path FROM room_images WHERE room_id = ?`,
+          [room_id]
+        );
+        // console.log(roomResult);
+        
+        
+        if (roomResult.length > 0 ) {
+          roomResult.forEach((imgPath: any) => {
+            const fullPath = path.join(__dirname,'../',imgPath.image_path);
+            
+            try {
+              if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+            } catch (e) {
+              console.warn(`Failed to delete file ${imgPath }:`, e);
+            }
+          });
+        }
+      }
+
       const [results]: any = await conn.query(
-        `CALL Sp_ManageRooms(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `CALL Sp_ManageRooms(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           action,
           room_id ?? null,
@@ -89,13 +109,13 @@ export const manageRooms = async (req: Request, res: Response) => {
           allow_pets ?? 0,
           provide_breakfast ?? 0,
           featured_room ?? 0,
+          is_available ?? 0,
           imagePaths.length > 0 ? JSON.stringify(imagePaths) : null
         ]
       );
 
-      // Process results...
       let data = Array.isArray(results[0]) ? results[0] : [results[0]];
-      
+
       res.status(200).json({
         success: true,
         message: `Room ${action} operation successful`,
@@ -104,8 +124,8 @@ export const manageRooms = async (req: Request, res: Response) => {
 
     } catch (error) {
       console.error('Database error:', error);
-      
-      // Cleanup uploaded files if error occurred
+
+      // Clean up newly uploaded files if error occurs
       if (req.files?.length) {
         (req.files as Express.Multer.File[]).forEach(file => {
           try { fs.unlinkSync(file.path); } catch (e) {}

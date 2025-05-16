@@ -35,7 +35,7 @@ function UsersCard({ loading, data }) {
           className='whitespace-normal lg:whitespace-nowrap'
           title='Admin Role Users'
           formatter={formatter}
-          value={data[0]?.admin_role_user || 0}
+          value={data[0]?.admin_role_users || 0}
         />
       </Card.Grid>
 
@@ -44,7 +44,7 @@ function UsersCard({ loading, data }) {
           className='whitespace-normal lg:whitespace-nowrap'
           title='User Role Users'
           formatter={formatter}
-          value={data[0]?.user_role_user || 0}
+          value={data[0]?.user_role_users || 0}
         />
       </Card.Grid>
 

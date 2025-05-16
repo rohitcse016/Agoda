@@ -2,13 +2,11 @@
  * @author Rohit Kumar
  */
 
-import { PlusOutlined } from '@ant-design/icons';
 import {
-  Button, Checkbox, Form, Input, InputNumber, Select, Upload
+  Button, Checkbox, Form, Input, InputNumber, Select
 } from 'antd';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import EF from '../../assets/data/extra-facilities.json';
 import { reFetchData } from '../../store/slice/appSlice';
 import ApiService from '../../utils/apiService';
 import notificationWithIcon from '../../utils/notification';
@@ -46,9 +44,9 @@ function CreateRoom({ hotel_id }) {
    
 
     // eslint-disable-next-line no-restricted-syntax
-    for (const facilities of values.extra_facilities) {
-      formData.append('extra_facilities', facilities);
-    }
+    // for (const facilities of values.extra_facilities) {
+    //   formData.append('extra_facilities', facilities);
+    // }
     // eslint-disable-next-line no-restricted-syntax
     if (values.room_images && values.room_images.length > 0) {
       values.room_images.forEach((image, index) => {
@@ -228,7 +226,7 @@ function CreateRoom({ hotel_id }) {
         />
       </Form.Item>
 
-      <Form.Item
+      {/* <Form.Item
         label='Extra Facilities'
         name='extra_facilities'
         rules={[{
@@ -244,7 +242,7 @@ function CreateRoom({ hotel_id }) {
           size='large'
           allowClear
         />
-      </Form.Item>
+      </Form.Item> */}
 
       <Form.Item
         name="room_images"
