@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
-  List, Card, Button, Rate, Tag, Tooltip, Row, Col, Typography, Image, Badge, Input
+  List, Card, Button, Rate, Tag, Tooltip, Row, Col, Typography, Image, Badge, Input,
+  Avatar
 } from 'antd';
 import {
   EditOutlined, DeleteOutlined, EnvironmentOutlined, HeartOutlined
@@ -40,13 +41,14 @@ function HotelList({ hotels, editHotel, deleteHotel }) {
             <Card bordered={false} style={{ borderRadius: 10, overflow: 'hidden', background: '#fff', boxShadow: 'initial' }}>
               <Row gutter={16}>
                 {/* Clickable Area */}
-                <Col span={18} onClick={() => navigate('/main/rooms', 
-                {state: {
-                    params: {
-                      hotel_id:hotel?.hotel_id
+                <Col span={18} onClick={() => navigate('/main/rooms',
+                  {
+                    state: {
+                      params: {
+                        hotel_id: hotel?.hotel_id
+                      }
                     }
-                  }
-                })} style={{ cursor: 'pointer' }}>
+                  })} style={{ cursor: 'pointer' }}>
                   <Row gutter={16}>
                     <Col span={8}>
                       <Badge.Ribbon text="20th B-DAY SALE" color="#722ed1">
@@ -60,10 +62,29 @@ function HotelList({ hotels, editHotel, deleteHotel }) {
                         />
                       </Badge.Ribbon>
                       <Row gutter={8} style={{ marginTop: 8 }}>
-                        <Col span={6}><Image src="https://via.placeholder.com/50" /></Col>
-                        <Col span={6}><Image src="https://via.placeholder.com/50" /></Col>
-                        <Col span={6}><Image src="https://via.placeholder.com/50" /></Col>
-                        <Col span={6}><Button type="link">See all</Button></Col>
+                        {/* {hotel?.images && hotel?.images.map((item, index) => (
+                          hotel.images.length == index ?
+                            <Col span={6}><Image src={`http://localhost:5000/${item?.image_path}`} /></Col>
+                            : <Col span={6}><Image src={`http://localhost:5000/${item?.image_path}`} />
+                              <Button type="link">See all</Button></Col>
+                        ))
+                        } */}
+
+
+                        <Avatar.Group
+                          size="large"
+                          max={{
+                            count: 3,
+                            style: { color: '#f56a00', backgroundColor: '#fde3cf', cursor: 'pointer' },
+                            popover: { trigger: 'click' },
+                          }}
+                        >{
+                          hotel?.images && hotel?.images.map((item, index) => (
+                            <Avatar src={`http://localhost:5000/${item?.image_path}`} />
+
+                          ))
+                        }
+                        </Avatar.Group>
                       </Row>
                     </Col>
 
@@ -80,16 +101,16 @@ function HotelList({ hotels, editHotel, deleteHotel }) {
                       <div style={{ marginTop: 12 }}>
                         <Text strong>This property offers:</Text>
                         <div style={{ marginTop: 4 }}>
-                          {hotel.breakfast && <Tag color="blue">Breakfast</Tag>}
-                          {hotel.lunch_included && <Tag color="blue">Lunch</Tag>}
-                          {hotel.dinner_included && <Tag color="blue">Dinner</Tag>}
-                          {hotel.free_wifi && <Tag color="blue">Free WiFi</Tag>}
-                          {hotel.premium_wifi && <Tag color="blue">Premium WiFi</Tag>}
-                          {hotel.parking && <Tag color="blue">Parking</Tag>}
-                          {hotel.fitness_center_access && <Tag color="blue">Fitness Center</Tag>}
-                          {hotel.welcome_drink && <Tag color="blue">Welcome Drink</Tag>}
-                          {hotel.pool_access && <Tag color="blue">Pool</Tag>}
-                          {hotel.beverages && <Tag color="blue">Beverages</Tag>}
+                          {hotel.breakfast ? <Tag color="blue">Breakfast</Tag> : ''}
+                          {hotel.lunch_included ? <Tag color="blue">Lunch</Tag> : null}
+                          {hotel.dinner_included ? <Tag color="blue">Dinner</Tag> : ''}
+                          {hotel.free_wifi ? <Tag color="blue">Free WiFi</Tag> : ''}
+                          {hotel.premium_wifi ? <Tag color="blue">Premium WiFi</Tag> : ''}
+                          {hotel.parking ? <Tag color="blue">Parking</Tag> : ''}
+                          {hotel.fitness_center_access ? <Tag color="blue">Fitness Center</Tag> : ''}
+                          {hotel.welcome_drink ? <Tag color="blue">Welcome Drink</Tag> : ''}
+                          {hotel.pool_access ? <Tag color="blue">Pool</Tag> : ''}
+                          {hotel.beverages ? <Tag color="blue">Beverages</Tag> : ''}
                         </div>
                       </div>
 

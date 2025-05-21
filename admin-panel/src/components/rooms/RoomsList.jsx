@@ -2,7 +2,7 @@
  * @author Rohit Kumar
  */
 
-import { ExclamationCircleFilled } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, ExclamationCircleFilled, EyeOutlined } from '@ant-design/icons';
 import {
   Avatar, Button, Empty, Modal, Pagination, Result, Skeleton, Tag
 } from 'antd';
@@ -17,30 +17,30 @@ import RoomEdit from './RoomEdit';
 
 const { confirm } = Modal;
 
-function RoomsList({ add,hotel_id }) {
+function RoomsList({ add, hotel_id }) {
   const [query, setQuery] = useState({
-  action: 'GET',
-  room_id: null,
-  hotel_id: hotel_id,
-  room_name: 'any',
-  room_slug: 'any',
-  room_type: '0',
-  room_price: '0',
-  room_size: '0',
-  room_capacity: '0',
-  room_description: 'any',
-  allow_pets: '0',
-  provide_breakfast: '0',
-  featured_room: '0'
-}
-);
+    action: 'GET',
+    room_id: null,
+    hotel_id: hotel_id,
+    room_name: 'any',
+    room_slug: 'any',
+    room_type: '0',
+    room_price: '0',
+    room_size: '0',
+    room_capacity: '0',
+    room_description: 'any',
+    allow_pets: '0',
+    provide_breakfast: '0',
+    featured_room: '0'
+  }
+  );
   const [roomEditModal, setRoomEditModal] = useState(
-    { open: false, room_id: null,hotel_id:null }
+    { open: false, room_id: null, hotel_id: null }
   );
   const [fetchAgain, setFetchAgain] = useState(false);
 
   // fetch room-list API data
-  const [loading, error, response] = useFetchData(`/hotelroom`, fetchAgain,query);
+  const [loading, error, response] = useFetchData(`/hotelroom`, fetchAgain, query);
 
   useEffect(() => {
     setQuery((prevState) => ({ ...prevState, page: '1' }));
@@ -54,7 +54,7 @@ function RoomsList({ add,hotel_id }) {
       content: 'Are you sure delete this Room permanently?',
       onOk() {
         return new Promise((resolve, reject) => {
-          ApiService.post('/hotelroom',{...query,action:'DELETE',room_id:id})
+          ApiService.post('/hotelroom', { ...query, action: 'DELETE', room_id: id })
             .then((res) => {
               if (res?.success) {
                 notificationWithIcon('success', 'SUCCESS', res?.data?.message || 'Room delete successful');
@@ -171,25 +171,22 @@ function RoomsList({ add,hotel_id }) {
                               className='inline-flex items-center !px-2'
                               onClick={() => add(data?.room_id)}
                               type='link'
-                            >
-                              View
-                            </Button>
+                              icon={<EyeOutlined />}
+                            />
                             <Button
                               className='inline-flex items-center !px-2'
                               onClick={() => setRoomEditModal(
-                                (prevState) => ({ ...prevState, open: true, room_id: data?.room_id,hotel_id:data?.hotel_id })
+                                (prevState) => ({ ...prevState, open: true, room_id: data?.room_id, hotel_id: data?.hotel_id })
                               )}
                               type='link'
-                            >
-                              Edit
-                            </Button>
+                              icon={<EditOutlined />}
+                            />
                             <Button
                               className='inline-flex items-center !px-2'
                               onClick={() => handleDeleteRoom(data?.room_id)}
                               type='link'
-                            >
-                              Delete
-                            </Button>
+                              icon={<DeleteOutlined />}
+                            />
                           </td>
                         </tr>
                       ))}

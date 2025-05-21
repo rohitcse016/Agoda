@@ -13,7 +13,7 @@ import {
 } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import Logo from '../assets/images/logo.svg';
+import Logo from '../assets/images/Tajde_Logo.png';
 import UserBox from '../components/shared/UserBox';
 import Dashboard from '../components/tabs/Dashboard';
 import Orders from '../components/tabs/Orders';
@@ -35,7 +35,7 @@ const {
 } = Layout;
 
 function Main() {
-  window.document.title = 'Agoda — Main';
+  window.document.title = 'Tajde — Main';
   const { isFullscreen, toggleFullScreen } = useFullScreen();
   const [selectedKeys, setSelectedKeys] = useState('1');
   const navigate = useNavigate();
@@ -167,27 +167,27 @@ function Main() {
   useEffect(() => {
     switch (selectedKeys) {
       case '1': {
-        window.document.title = 'Agoda — Dashboard';
+        window.document.title = 'Tajde — Dashboard';
         break;
       }
       case '2': {
-        window.document.title = 'Agoda — Users';
+        window.document.title = 'Tajde — Users';
         break;
       }
       case '3': {
-        window.document.title = 'Agoda — Hotels';
+        window.document.title = 'Tajde — Hotels';
         break;
       }
       case '4': {
-        window.document.title = 'Agoda — Booking Orders';
+        window.document.title = 'Tajde — Booking Orders';
         break;
       }
       case '5': {
-        window.document.title = 'Agoda — Profile';
+        window.document.title = 'Tajde — Profile';
         break;
       }
       case '6': {
-        window.document.title = 'Agoda — Logout';
+        window.document.title = 'Tajde — Logout';
         break;
       }
       case '7': {
@@ -195,7 +195,7 @@ function Main() {
         break;
       }
       default: {
-        window.document.title = 'Agoda — Dashboard';
+        window.document.title = 'Tajde — Dashboard';
       }
     }
   }, [selectedKeys]);
@@ -231,7 +231,7 @@ function Main() {
             {
               key: '4',
               icon: <FileProtectOutlined />,
-              label: 'Booking Orders'
+              label: 'Hotel Booking Orders'
             },
             {
               key: '8',
@@ -306,7 +306,7 @@ function Main() {
         </Content>
 
         <Footer className='text-center font-text-font font-medium '>
-          ©2025 Agoda — Powerd By
+          ©2025 Tajde — Powerd By
           {' '}
           <a
             className='text-color-primary hover:text-color-secondary'

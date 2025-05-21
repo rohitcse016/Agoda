@@ -9,6 +9,7 @@ import {
   Descriptions,
   message,
   Typography,
+  DatePicker,
 } from 'antd';
 import {
   SearchOutlined,
@@ -21,7 +22,9 @@ import axios from 'axios';
 import useFetchData from '../../hooks/useFetchData';
 import ApiService from '../../utils/apiService';
 import { render } from 'react-dom';
+
 import dayjs from 'dayjs';
+const { RangePicker } = DatePicker;
 
 const CarBookingHistory = () => {
   const [searchText, setSearchText] = useState('');
@@ -30,6 +33,8 @@ const CarBookingHistory = () => {
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState({ action: 'GET' });
   const [error, setError] = useState('');
+   const [billingInfo, setBillingInfo] = useState(null);
+    const [dateRange, setDateRange] = useState([null, null]);
   const [data, setData] = useState([
   {
     id: 1,
@@ -75,19 +80,56 @@ const CarBookingHistory = () => {
   // const [loading, error, response] = useFetchData("/carbooking", false, query);
 
 
-  const filteredData = data.filter(item =>
-    item?.user_name?.toLowerCase().includes(searchText.toLowerCase())
-  );
+  // const filteredData = data.filter(item =>
+  //   item?.user_name?.toLowerCase().includes(searchText.toLowerCase())
+  // );
 
-  const showDetails = (record) => {
-    setSelectedBooking(record);
-    setIsModalVisible(true);
-  };
+    const filteredData = data.filter(item => {
+      const matchesUser = item?.user_name?.toLowerCase().includes(searchText.toLowerCase());
+      if (!matchesUser) return false;
+  
+      if (dateRange[0] && dateRange[1]) {
+        const departureDate = dayjs(item?.booking_date).valueOf();
+        const from = dayjs(dateRange[0]).valueOf();
+        const to = dayjs(dateRange[1]).valueOf();
+  
+        return departureDate >= from && departureDate <= to;
+      }
+  
+      return true;
+    });
+
 
   // 🔁 Fetch booking data on mount
   useEffect(() => {
     fetchCarBookings();
   }, []);
+  
+   const showDetails = async (record) => {
+    setSelectedBooking(record);
+    setIsModalVisible(true);
+    setBillingInfo(null);
+    console.log(record);
+    
+
+    try {
+      const billingRes = await ApiService.post('/billings', {
+        action: 'GET',
+        booking_type: 'car',
+        booking_id: record.booking_id,
+      });
+
+      if (billingRes?.success && billingRes.data?.length) {
+        setBillingInfo(billingRes.data[0]);
+      } else {
+        setBillingInfo(null);
+      }
+    } catch (error) {
+      message.warning("Failed to load billing info");
+      setBillingInfo(null);
+    }
+  };
+
 
   const fetchCarBookings = () => {
     ApiService.post('/carbooking',query)
@@ -163,8 +205,8 @@ const columns = [
   { title: 'Car Model', dataIndex: 'carModel', key: 'carModel' },
   { title: 'Pickup', dataIndex: 'pickup_location', key: 'pickup_location' },
   { title: 'Drop', dataIndex: 'dropoff_location', key: 'dropoff_location' },
-  { title: 'Date', dataIndex: 'pickup_date', key: 'pickup_date' ,
-    render:(data)=><Typography>{dayjs(data?.booking_date).format('DD-MMM-YYYY')}</Typography>
+  { title: 'Date', dataIndex: 'booking_date', key: 'booking_date' ,
+    render:(data)=><Typography>{dayjs(data).format('DD-MMM-YYYY')}</Typography>
   },
   {
     title: 'Status',
@@ -204,6 +246,17 @@ return (
         value={searchText}
         style={{ width: 300 }}
       />
+       <RangePicker
+                onChange={(dates) => setDateRange(dates)}
+                // value={dateRange}
+                allowClear={false}
+                style={{ marginLeft: 8 }}
+                format="DD-MMM-YYYY"
+                placeholder={['From Date', 'To Date']}
+              />
+              <Button onClick={() => setDateRange([null, null])} style={{ marginLeft: 4 }}>
+                Clear Dates
+              </Button>
       <Button type="primary" icon={<FileExcelOutlined />} onClick={exportCSV}>
         Export CSV
       </Button>
@@ -244,12 +297,12 @@ return (
             size="small"
             title="Trip Details"
           >
-            <Descriptions.Item label="User Name">{selectedBooking.userName}</Descriptions.Item>
+            <Descriptions.Item label="User Name">{selectedBooking.user_name}</Descriptions.Item>
             <Descriptions.Item label="Car Model">{selectedBooking.carModel}</Descriptions.Item>
-            <Descriptions.Item label="Pickup">{selectedBooking.pickupLocation}</Descriptions.Item>
-            <Descriptions.Item label="Drop">{selectedBooking.dropoffLocation}</Descriptions.Item>
-            <Descriptions.Item label="Date">{selectedBooking.pickupDate}</Descriptions.Item>
-            <Descriptions.Item label="Booking ID">{selectedBooking.bookingId}</Descriptions.Item>
+            <Descriptions.Item label="Pickup">{selectedBooking.pickup_location}</Descriptions.Item>
+            <Descriptions.Item label="Drop">{selectedBooking.dropoff_location}</Descriptions.Item>
+            <Descriptions.Item label="Date">{selectedBooking.booking_date}</Descriptions.Item>
+            <Descriptions.Item label="Booking ID">{selectedBooking.id}</Descriptions.Item>
             <Descriptions.Item label="Status">
               <Tag color={selectedBooking.status === 'Completed' ? 'green' : 'volcano'}>
                 {selectedBooking.status}
@@ -266,12 +319,18 @@ return (
             title="Billing Details"
             style={{ marginTop: 20 }}
           >
-            <Descriptions.Item label="Fare">₹{selectedBooking.billing?.fare}</Descriptions.Item>
-            <Descriptions.Item label="Taxes">₹{selectedBooking.billing?.taxes}</Descriptions.Item>
-            <Descriptions.Item label="Discount">₹{selectedBooking.billing?.discount}</Descriptions.Item>
-            <Descriptions.Item label="Total">₹{selectedBooking.billing?.total}</Descriptions.Item>
-            <Descriptions.Item label="Payment Method">{selectedBooking.billing?.paymentMethod}</Descriptions.Item>
-            <Descriptions.Item label="Transaction ID">{selectedBooking.billing?.transactionId}</Descriptions.Item>
+             {billingInfo ? (
+          <>
+            <Descriptions.Item label="Fare">₹{billingInfo.fare}</Descriptions.Item>
+            <Descriptions.Item label="Taxes">₹{billingInfo.taxes}</Descriptions.Item>
+            <Descriptions.Item label="Discount">₹{billingInfo.discount}</Descriptions.Item>
+            <Descriptions.Item label="Total">₹{billingInfo.total}</Descriptions.Item>
+            <Descriptions.Item label="Payment Method">{billingInfo.payment_method}</Descriptions.Item>
+            <Descriptions.Item label="Transaction ID">{billingInfo.transaction_id}</Descriptions.Item>
+          </>
+        ) : (
+          <Descriptions.Item span={2}>No billing information available.</Descriptions.Item>
+        )}
           </Descriptions>
         </>
       )}

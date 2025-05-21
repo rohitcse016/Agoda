@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Table, Input, Tag, Space, Modal, Button, Descriptions, Typography, message
+  Table, Input, Tag, Space, Modal, Button, Descriptions, Typography, message, DatePicker
 } from 'antd';
 import {
   SearchOutlined, FilePdfOutlined, FileExcelOutlined
@@ -10,6 +10,8 @@ import autoTable from 'jspdf-autotable';
 import ApiService from '../../utils/apiService';
 import dayjs from 'dayjs';
 
+const { RangePicker } = DatePicker;
+
 const TrainBookingHistory = () => {
   const [searchText, setSearchText] = useState('');
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -18,7 +20,7 @@ const TrainBookingHistory = () => {
   const [data, setData] = useState([]);
   const [query] = useState({ action: 'GET' });
   const [billingInfo, setBillingInfo] = useState(null);
-
+  const [dateRange, setDateRange] = useState([null, null]); // [fromDate, toDate]
 
   useEffect(() => {
     fetchTrainBookings();
@@ -40,34 +42,45 @@ const TrainBookingHistory = () => {
         message.error('Something went wrong while fetching train bookings.');
       });
   };
-  
+
   const showDetails = async (record) => {
-  setSelectedBooking(record);
-  setIsModalVisible(true);
-  setBillingInfo(null);
+    setSelectedBooking(record);
+    setIsModalVisible(true);
+    setBillingInfo(null);
 
-  try {
-    const billingRes = await ApiService.post('/billings', {
-      action: 'GET',
-      booking_type: 'train',
-      booking_id: record.booking_id,
-    });
+    try {
+      const billingRes = await ApiService.post('/billings', {
+        action: 'GET',
+        booking_type: 'train',
+        booking_id: record.booking_id,
+      });
 
-    if (billingRes?.success && billingRes.data?.length) {
-      setBillingInfo(billingRes.data[0]); // Assuming one billing per booking
-    } else {
+      if (billingRes?.success && billingRes.data?.length) {
+        setBillingInfo(billingRes.data[0]);
+      } else {
+        setBillingInfo(null);
+      }
+    } catch (error) {
+      message.warning("Failed to load billing info");
       setBillingInfo(null);
     }
-  } catch (error) {
-    message.warning("Failed to load billing info");
-    setBillingInfo(null);
-  }
-};
+  };
 
+  // Filtering data by user name AND date range
+  const filteredData = data.filter(item => {
+    const matchesUser = item?.user_name?.toLowerCase().includes(searchText.toLowerCase());
+    if (!matchesUser) return false;
 
-  const filteredData = data.filter(item =>
-    item?.user_name?.toLowerCase().includes(searchText.toLowerCase())
-  );
+    if (dateRange[0] && dateRange[1]) {
+      const departureDate = dayjs(item?.departure_date).valueOf();
+      const from = dayjs(dateRange[0]).valueOf();
+      const to = dayjs(dateRange[1]).valueOf();
+
+      return departureDate >= from && departureDate <= to;
+    }
+
+    return true;
+  });
 
   const exportCSV = () => {
     if (!filteredData.length) return;
@@ -146,8 +159,6 @@ const TrainBookingHistory = () => {
     },
   ];
 
-
-
   return (
     <div style={{ padding: 20, maxWidth: 1400, margin: '0 auto' }}>
       <h2>Train Booking History (Admin)</h2>
@@ -160,6 +171,18 @@ const TrainBookingHistory = () => {
           value={searchText}
           style={{ width: 300 }}
         />
+        {/* Date Range Picker */}
+        <RangePicker
+          onChange={(dates) => setDateRange(dates)}
+          // value={dateRange}
+          allowClear={false}
+          style={{ marginLeft: 8 }}
+          format="DD-MMM-YYYY"
+          placeholder={['From Date', 'To Date']}
+        />
+        <Button onClick={() => setDateRange([null, null])} style={{ marginLeft: 4 }}>
+          Clear Dates
+        </Button>
         <Button type="primary" icon={<FileExcelOutlined />} onClick={exportCSV}>Export CSV</Button>
         <Button type="primary" danger icon={<FilePdfOutlined />} onClick={exportPDF}>Export PDF</Button>
       </Space>
@@ -205,18 +228,18 @@ const TrainBookingHistory = () => {
             </Descriptions>
 
             <Descriptions bordered column={{ xs: 1, md: 2 }} size="small" title="Billing Info" style={{ marginTop: 20 }}>
-             {billingInfo ? (
-  <>
-    <Descriptions.Item label="Fare">₹{billingInfo.fare}</Descriptions.Item>
-    <Descriptions.Item label="Taxes">₹{billingInfo.taxes}</Descriptions.Item>
-    <Descriptions.Item label="Discount">₹{billingInfo.discount}</Descriptions.Item>
-    <Descriptions.Item label="Total">₹{billingInfo.total}</Descriptions.Item>
-    <Descriptions.Item label="Payment Method">{billingInfo.payment_method}</Descriptions.Item>
-    <Descriptions.Item label="Transaction ID">{billingInfo.transaction_id}</Descriptions.Item>
-  </>
-) : (
-  <Descriptions.Item span={2}>No billing information available.</Descriptions.Item>
-)}
+              {billingInfo ? (
+                <>
+                  <Descriptions.Item label="Fare">₹{billingInfo.fare}</Descriptions.Item>
+                  <Descriptions.Item label="Taxes">₹{billingInfo.taxes}</Descriptions.Item>
+                  <Descriptions.Item label="Discount">₹{billingInfo.discount}</Descriptions.Item>
+                  <Descriptions.Item label="Total">₹{billingInfo.total}</Descriptions.Item>
+                  <Descriptions.Item label="Payment Method">{billingInfo.payment_method}</Descriptions.Item>
+                  <Descriptions.Item label="Transaction ID">{billingInfo.transaction_id}</Descriptions.Item>
+                </>
+              ) : (
+                <Descriptions.Item span={2}>No billing information available.</Descriptions.Item>
+              )}
             </Descriptions>
           </>
         )}

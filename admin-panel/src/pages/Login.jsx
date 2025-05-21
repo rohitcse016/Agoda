@@ -8,13 +8,13 @@ import {
 } from 'antd';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Logo from '../assets/images/logo.svg';
+import Logo from '../assets/images/Tajde_Logo.png';
 import useTimeout from '../hooks/useTimeout';
 import ApiService from '../utils/apiService';
 import { setSessionUserAndToken } from '../utils/authentication';
 
 function Login() {
-  window.document.title = 'Agoda — Login';
+  window.document.title = 'Tajde — Login';
   const [loading, setLoading] = useState(false);
   const [errMsg, setErrMsg] = useState('');
 
@@ -50,6 +50,7 @@ function Login() {
       <div className='w-[90%] md:w-[450px]'>
         <Link to='/'>
           <img
+           style={{boxShadow:10}}
             className='w-[280px] h-[65px] mx-auto'
             alt='beach-resort-logo'
             src={Logo}

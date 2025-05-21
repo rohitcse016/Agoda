@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "version": "2.0.0",
-    "title": "Agoda Apis",
+    "title": "Tajde Apis",
     "description": "API for Managing queue calls",
     "contact": {
       "name": "API Support",

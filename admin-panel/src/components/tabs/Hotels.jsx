@@ -5,8 +5,8 @@ import {
 } from 'antd';
 import ApiService from '../../utils/apiService';
 import HotelList from './Hotel/HotelList';
-import ImageUpload from '../shared/ImageUpload';
 import HotelFilterSidebar from '../dashboard/HotelFilterSidebar';
+import ImageUploadMultipart from '../shared/ImageUploadMultipart';
 
 function Hotels() {
   const [activeKey, setActiveKey] = useState('1');
@@ -46,13 +46,68 @@ function Hotels() {
 
   const addHotel = async (hotel) => {
     try {
-      const params = {
+      const values = {
         action: 'ADD',
         hotel_id: 0,
         ...hotel
       };
-      console.log(params);
-      await ApiService.post('/hotel', params);
+      const formData = new FormData();
+
+// Basic Hotel Info
+formData.append('action', 'ADD'); // or 'ADD'
+formData.append('HotelID',  0); // Use 0 or null for ADD
+formData.append('name', values.name || '');
+formData.append('Description', values.description || '');
+formData.append('City', values.city || '');
+formData.append('State', values.state || '');
+formData.append('Country', values.country || '');
+formData.append('Address', values.address || '');
+formData.append('StarRating', values.star_rating || '0.0');
+formData.append('Hotel_Price', values.hotel_price || '0.00');
+
+console.log(values);
+const facilitiesArray = [
+  {
+    breakfast: values.facility?.breakfast ? 1 : 0,
+    lunch_included: values.facility?.lunch_included ? 1 : 0,
+    dinner_included: values.facility?.dinner_included ? 1 : 0,
+    parking: values.facility?.parking ? 1 : 0,
+    free_wifi: values.facility?.free_wifi ? 1 : 0,
+    premium_wifi: values.facility?.premium_wifi ? 1 : 0,
+    fitness_center_access: values.facility?.fitness_center_access ? 1 : 0,
+    welcome_drink: values.facility?.welcome_drink ? 1 : 0,
+    pool_access: values.facility?.pool_access ? 1 : 0,
+    beverages: values.facility?.beverages ? 1 : 0,
+    additional_info: values.facility?.additional_info || '',
+    image_path: '' // Optional: can be filled in if each facility has its own image
+  }
+];
+
+formData.append('FacilitiesJson', JSON.stringify(facilitiesArray));
+
+// Hotel Images JSON (paths/names only, assuming you handle uploads separately)
+// const hotelImagePaths = values.hotel_images?.map(img => `/uploads/hotel_images/${img.name}`) || [];
+// formData.append('ImagePathsJson', JSON.stringify(hotelImagePaths));
+
+
+ if (values.hotel_images && values.hotel_images.length > 0) {
+      values.hotel_images.forEach((image, index) => {
+        // Check if image is a File object (new upload) or existing path (string)
+
+        formData.append(`hotel_images`, image); // Append the actual file
+        if (image instanceof File) {
+          console.log(image);
+        } else if (typeof image === 'string') {
+          // If it's a string, it might be an existing image path
+          formData.append(`existing_images[${index}]`, image);
+        }
+      });
+    }
+
+      console.log(values);
+       await ApiService.post('/hotel', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
       await fetchHotels();
       message.success('Hotel added successfully');
     } catch (error) {
@@ -78,18 +133,27 @@ function Hotels() {
   };
 
   const deleteHotel = async (hotel) => {
+    console.log(hotel);
+    
     try {
       const params = {
         action: 'DELETE',
-        hotel_id: hotel.hotel_id
+        hotel_id: hotel.hotel_id,
+        name:hotel?.name,
       };
       await ApiService.post('/hotel', params);
-      setHotels(hotels.filter((h) => h.hotel_id !== hotel.hotel_id));
+      fetchHotels();
+      // setHotels(hotels.filter((h) => h.hotel_id !== hotel.hotel_id));
       message.success('Hotel deleted successfully');
     } catch (error) {
       message.error('Failed to delete hotel');
       console.error(error);
     }
+  };
+
+    const normFile = (e) => {
+    if (Array.isArray(e)) { return e; }
+    return e?.fileList;
   };
 
   const handleFormSubmit = (values) => {
@@ -107,7 +171,7 @@ function Hotels() {
       beverages: values.facility.beverages ? 1 : 0,
       image_base64: values?.image_base64
     }];
-    console.log(values?.image_base64, facilities);
+    console.log(values?.hotel_images, facilities);
     const finalPayload = {
       ...values,
       facilitiesJson: JSON.stringify(facilities),
@@ -274,13 +338,24 @@ function Hotels() {
           <Form.Item label="Additional Info" name={['facility', 'additional_info']}>
             <Input.TextArea rows={2} />
           </Form.Item>
+
           <Form.Item
-            label="Facility Image"
-            name='image_base64'
+        label="Hotel Images"
+            name='hotel_images'
             valuePropName="value"
-          >
-            <ImageUpload />
-          </Form.Item>
+        getValueFromEvent={normFile}
+        rules={[
+          {
+            required: false,
+            validator: (_, value) =>
+              value?.length > 0
+                ? Promise.resolve()
+                : Promise.reject('Please upload at least one image!')
+          }
+        ]}
+      >
+        <ImageUploadMultipart />
+      </Form.Item>
           <Button type="primary" loading={loading} htmlType='submit'>
             Save
           </Button>

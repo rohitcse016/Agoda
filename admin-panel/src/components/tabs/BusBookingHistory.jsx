@@ -7,6 +7,7 @@ import {
   Modal,
   Button,
   Descriptions,
+  Typography,
 } from 'antd';
 import {
   SearchOutlined,
@@ -15,6 +16,9 @@ import {
 } from '@ant-design/icons';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import ApiService from '../../utils/apiService';
+import { render } from 'react-dom';
+import dayjs from 'dayjs';
 
 const mockBusData = [
   {
@@ -66,10 +70,33 @@ const BusBookingHistory = () => {
   const [searchText, setSearchText] = useState('');
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [query, setQuery] = useState({ action: 'GET' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     setData(mockBusData);
   }, []);
+
+    useEffect(() => {
+    fetchCarBookings();
+  }, []);
+
+  const fetchCarBookings = () => {
+    ApiService.post('/busbooking/',query)
+      .then((res) => {
+        setLoading(false);
+        if (res?.success) {
+          setData(res?.data);
+        } else {
+          setError('Sorry! Something went wrong. App server error');
+        }
+      })
+      .catch((err) => {
+        setError(err?.response?.data?.result?.error || 'Sorry! Something went wrong. App server error');
+        setLoading(false);
+      });
+  }
 
   const showDetails = (record) => {
     setSelectedBooking(record);
@@ -128,11 +155,13 @@ const BusBookingHistory = () => {
   };
 
   const columns = [
-    { title: 'User', dataIndex: 'userName', key: 'userName' },
-    { title: 'Bus', dataIndex: 'busNumber', key: 'busNumber' },
-    { title: 'From', dataIndex: 'from', key: 'from' },
-    { title: 'To', dataIndex: 'to', key: 'to' },
-    { title: 'Date', dataIndex: 'date', key: 'date' },
+    { title: 'User', dataIndex: 'user_fullname', key: 'userName' },
+    { title: 'Bus', dataIndex: 'bus_id', key: 'bus_id' },
+    { title: 'From', dataIndex: 'boarding_point', key: 'boarding_point' },
+    { title: 'To', dataIndex: 'dropping_point', key: 'dropping_point' },
+    { title: 'Date', dataIndex: 'booking_date', key: 'booking_date',
+      render:(data)=> <Typography>{dayjs(data).format('DD-MMM-YYYY')}</Typography>
+     },
     {
       title: 'Status',
       dataIndex: 'status',
@@ -145,8 +174,8 @@ const BusBookingHistory = () => {
     },
     {
       title: 'Total (₹)',
-      key: 'total',
-      render: (_, record) => record.billing?.total ?? 'N/A',
+      key: 'total_price',
+      render: (_, record) => record.total_price ?? 'N/A',
     },
     {
       title: 'Actions',
@@ -218,13 +247,13 @@ const BusBookingHistory = () => {
               size="small"
               title="Journey Details"
             >
-              <Descriptions.Item label="User Name">{selectedBooking.userName}</Descriptions.Item>
-              <Descriptions.Item label="Bus Number">{selectedBooking.busNumber}</Descriptions.Item>
-              <Descriptions.Item label="From">{selectedBooking.from}</Descriptions.Item>
-              <Descriptions.Item label="To">{selectedBooking.to}</Descriptions.Item>
-              <Descriptions.Item label="Date">{selectedBooking.date}</Descriptions.Item>
-              <Descriptions.Item label="Seat">{selectedBooking.seat}</Descriptions.Item>
-              <Descriptions.Item label="Booking ID">{selectedBooking.bookingId}</Descriptions.Item>
+              <Descriptions.Item label="User Name">{selectedBooking.user_fullname}</Descriptions.Item>
+              <Descriptions.Item label="Bus Number">{selectedBooking.bus_id}</Descriptions.Item>
+              <Descriptions.Item label="From">{selectedBooking.boarding_point}</Descriptions.Item>
+              <Descriptions.Item label="To">{selectedBooking.dropping_point}</Descriptions.Item>
+              <Descriptions.Item label="Date">{selectedBooking.booking_date}</Descriptions.Item>
+              <Descriptions.Item label="No of Seats">{selectedBooking.seat_count}</Descriptions.Item>
+              <Descriptions.Item label="Booking ID">{selectedBooking.id}</Descriptions.Item>
               <Descriptions.Item label="Status">
                 <Tag color={selectedBooking.status === 'Confirmed' ? 'green' : 'volcano'}>
                   {selectedBooking.status}
