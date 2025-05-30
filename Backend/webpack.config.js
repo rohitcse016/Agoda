@@ -2,7 +2,7 @@ const path = require('path');
 const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
-  entry: './src/index.js',  // Your TypeScript entry point
+  entry: './src/index.ts',  // Your TypeScript entry point
   target: 'node',  // Since it's a Node.js application
   externals: [nodeExternals()],  // Exclude node_modules from being bundled
   output: {

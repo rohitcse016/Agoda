@@ -36,8 +36,8 @@ function HotelList({ hotels, editHotel, deleteHotel }) {
       <List
         grid={{ gutter: 16, column: 1 }}
         dataSource={filteredHotels}
-        renderItem={(hotel) => (
-          <List.Item>
+        renderItem={(hotel,index) => (
+          <List.Item key={index}>
             <Card bordered={false} style={{ borderRadius: 10, overflow: 'hidden', background: '#fff', boxShadow: 'initial' }}>
               <Row gutter={16}>
                 {/* Clickable Area */}
@@ -53,12 +53,11 @@ function HotelList({ hotels, editHotel, deleteHotel }) {
                     <Col span={8}>
                       <Badge.Ribbon text="20th B-DAY SALE" color="#722ed1">
                         <Image
-                          src={`http://localhost:5000${hotel?.image_path}`}
+                          src={`http://localhost:5000/${hotel?.image_path}`}
                           alt={`Image of ${hotel.name}`}
                           width="100%"
                           height={200}
                           style={{ objectFit: 'cover', borderRadius: 8 }}
-                          fallback="https://via.placeholder.com/300x200?text=No+Image"
                         />
                       </Badge.Ribbon>
                       <Row gutter={8} style={{ marginTop: 8 }}>

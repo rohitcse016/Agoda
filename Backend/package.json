@@ -1,11 +1,12 @@
 {
   "name": "trolly-api",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/bundle.js ",
     "start": "node dist/bundle.js",
     "dev": "nodemon src/index.ts",
+
     "swagger-autogen": "node ./src/docs/swagger.js"
   },
   "keywords": [],

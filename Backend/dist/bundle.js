@@ -49956,7 +49956,7 @@ var require_make_middleware = __commonJS({
         if (!is(req, ["multipart"])) return next();
         var options = setup();
         var limits = options.limits;
-        var storage2 = options.storage;
+        var storage3 = options.storage;
         var fileFilter = options.fileFilter;
         var fileStrategy = options.fileStrategy;
         var preservePath = options.preservePath;
@@ -49990,7 +49990,7 @@ var require_make_middleware = __commonJS({
           errorOccured = true;
           pendingWrites.onceZero(function() {
             function remove(file, cb) {
-              storage2._removeFile(req, file, cb);
+              storage3._removeFile(req, file, cb);
             }
             removeUploadedFiles(uploadedFiles, remove, function(err, storageErrors) {
               if (err) return done(err);
@@ -50047,7 +50047,7 @@ var require_make_middleware = __commonJS({
               aborting = true;
               abortWithCode("LIMIT_FILE_SIZE", fieldname);
             });
-            storage2._handleFile(req, file, function(err2, info) {
+            storage3._handleFile(req, file, function(err2, info) {
               if (aborting) {
                 appender.removePlaceholder(placeholder);
                 uploadedFiles.push(extend(file, info));
@@ -52978,7 +52978,7 @@ var require_multer = __commonJS({
       }
       return makeMiddleware(setup.bind(this));
     };
-    function multer2(options) {
+    function multer3(options) {
       if (options === void 0) {
         return new Multer({});
       }
@@ -52987,7 +52987,7 @@ var require_multer = __commonJS({
       }
       throw new TypeError("Expected object for argument options");
     }
-    module2.exports = multer2;
+    module2.exports = multer3;
     module2.exports.diskStorage = diskStorage;
     module2.exports.memoryStorage = memoryStorage;
     module2.exports.MulterError = MulterError;
@@ -53355,6 +53355,9 @@ var require_swagger = __commonJS({
             responses: {
               "200": {
                 description: "OK"
+              },
+              "400": {
+                description: "Bad Request"
               },
               "500": {
                 description: "Internal Server Error"
@@ -53867,7 +53870,7 @@ var config = {
   // Default MySQL port; change if needed
   user: "root",
   password: "mysql",
-  database: "Tajde"
+  database: "Agoda"
 };
 var pool = null;
 var getDbConnection = async () => {
@@ -54021,73 +54024,95 @@ var import_express4 = __toESM(require_express2());
 // src/controllers/ManageHotels.ts
 var import_fs = __toESM(require("fs"));
 var import_path = __toESM(require("path"));
-var manageHotels = async (req, res) => {
-  const {
-    action,
-    hotel_id,
-    name,
-    description,
-    city,
-    state,
-    country,
-    address,
-    star_rating,
-    hotel_price,
-    facilitiesJson
-    // array
-  } = req.body;
-  try {
-    const conn = await getDbConnection();
-    let facilitiesArray = facilitiesJson ? JSON.parse(facilitiesJson) : [];
-    const uploadDir2 = import_path.default.join(__dirname, "../uploads/hotel_images");
-    if (!import_fs.default.existsSync(uploadDir2)) {
-      import_fs.default.mkdirSync(uploadDir2, { recursive: true });
-    }
-    facilitiesArray = facilitiesArray.map((facility, index) => {
-      if (facility.image_base64) {
-        const base64Data = facility.image_base64.replace(/^data:image\/\w+;base64,/, "");
-        const filename = `hotel_${hotel_id ?? "new"}_${Date.now()}_${index}.png`;
-        const imagePath = `/uploads/hotel_images/${filename}`;
-        import_fs.default.writeFileSync(import_path.default.join(uploadDir2, filename), base64Data, { encoding: "base64" });
-        delete facility.image_base64;
-        facility.image_path = imagePath;
-      }
-      return facility;
-    });
-    const updatedFacilitiesJson = JSON.stringify(facilitiesArray);
-    const [results] = await conn.query(
-      `CALL ManageHotels(?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`,
-      [
-        action,
-        hotel_id ?? null,
-        name ?? null,
-        description ?? null,
-        city ?? null,
-        state ?? null,
-        country ?? null,
-        address ?? null,
-        star_rating ?? null,
-        hotel_price ?? 0,
-        updatedFacilitiesJson
-        // JSON string passed to procedure
-      ]
-    );
-    let data = [];
-    if (action === "GET") {
-      data = results[0];
-    }
-    res.status(200).json({
-      success: true,
-      message: `Hotel ${action} operation successful.`,
-      data
-    });
-  } catch (error) {
-    console.error(`Error executing ManageHotels procedure:`, error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error"
-    });
+var import_multer = __toESM(require_multer());
+var hotelUploadDir = import_path.default.join(__dirname, "../uploads/hotel_images");
+if (!import_fs.default.existsSync(hotelUploadDir)) {
+  import_fs.default.mkdirSync(hotelUploadDir, { recursive: true });
+}
+var storage = import_multer.default.diskStorage({
+  destination: (req, file, cb) => cb(null, hotelUploadDir),
+  filename: (req, file, cb) => {
+    const uniqueName = `hotel-${Date.now()}-${Math.round(Math.random() * 1e9)}.${file.mimetype.split("/")[1]}`;
+    cb(null, uniqueName);
   }
+});
+var upload = (0, import_multer.default)({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  // 5MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (allowedTypes.includes(file.mimetype)) cb(null, true);
+    else cb(new Error("Only JPEG, PNG, and WEBP are allowed."));
+  }
+}).array("hotel_images", 10);
+var manageHotels = async (req, res) => {
+  upload(req, res, async (err) => {
+    if (err) {
+      console.error("File upload error:", err);
+      return res.status(400).json({
+        success: false,
+        message: err.message || "File upload failed"
+      });
+    }
+    const {
+      action,
+      hotel_id,
+      name,
+      description,
+      city,
+      state,
+      country,
+      address,
+      star_rating,
+      hotel_price,
+      facilitiesJson
+    } = req.body;
+    const files = req.files;
+    const imagePaths = files?.map(
+      (file) => import_path.default.relative(import_path.default.join(__dirname, "./.."), file.path)
+    ) || [];
+    try {
+      const conn = await getDbConnection();
+      const [results] = await conn.query(
+        `CALL ManageHotels(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`,
+        [
+          action,
+          hotel_id ?? null,
+          name ?? null,
+          description ?? null,
+          city ?? null,
+          state ?? null,
+          country ?? null,
+          address ?? null,
+          star_rating ?? null,
+          hotel_price ?? 0,
+          facilitiesJson ? JSON.stringify(facilitiesJson) : null,
+          imagePaths.length ? JSON.stringify(imagePaths) : null
+        ]
+      );
+      if (action == "ADD")
+        console.log(results);
+      const data = action === "GET" ? results[0] : [];
+      res.status(200).json({
+        success: true,
+        message: `Hotel ${action} operation successful.`,
+        data
+      });
+    } catch (error) {
+      console.error("ManageHotels DB error:", error);
+      files?.forEach((file) => {
+        try {
+          import_fs.default.unlinkSync(file.path);
+        } catch (e) {
+        }
+      });
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error"
+      });
+    }
+  });
 };
 
 // src/routes/ManageHotelRoutes.ts
@@ -54099,14 +54124,14 @@ var ManageHotelRoutes_default = router4;
 var import_express5 = __toESM(require_express2());
 
 // src/controllers/ManageHotelRoom.ts
-var import_multer = __toESM(require_multer());
+var import_multer2 = __toESM(require_multer());
 var import_path2 = __toESM(require("path"));
 var import_fs2 = __toESM(require("fs"));
 var uploadDir = import_path2.default.join(__dirname, "../uploads/hotelRoom_images");
 if (!import_fs2.default.existsSync(uploadDir)) {
   import_fs2.default.mkdirSync(uploadDir, { recursive: true });
 }
-var storage = import_multer.default.diskStorage({
+var storage2 = import_multer2.default.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
   },
@@ -54115,8 +54140,8 @@ var storage = import_multer.default.diskStorage({
     cb(null, "room-" + uniqueSuffix + "." + file.mimetype.split("/")[1]);
   }
 });
-var upload = (0, import_multer.default)({
-  storage,
+var upload2 = (0, import_multer2.default)({
+  storage: storage2,
   limits: { fileSize: 5 * 1024 * 1024 },
   // 5MB limit
   fileFilter: (req, file, cb) => {
@@ -54129,12 +54154,12 @@ var upload = (0, import_multer.default)({
   }
 }).array("room_images", 10);
 var manageRooms = async (req, res) => {
-  upload(req, res, async (err) => {
+  upload2(req, res, async (err) => {
     if (err) {
       console.error("File upload error:", err);
       return res.status(400).json({
         success: false,
-        message: err instanceof import_multer.default.MulterError ? `File upload error: ${err.message}` : err.message
+        message: err instanceof import_multer2.default.MulterError ? `File upload error: ${err.message}` : err.message
       });
     }
     const {

@@ -5,7 +5,7 @@ const webConfigContent = `
 <configuration>
 <system.webServer>
 <handlers>
-  <add name="iisnode" path="index.js" verb="*" modules="iisnode" />
+  <add name="iisnode" path="index.ts" verb="*" modules="iisnode" />
 </handlers>
 <rewrite>
   <rules>
@@ -14,7 +14,7 @@ const webConfigContent = `
       <conditions>
         <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
       </conditions>
-      <action type="Rewrite" url="index.js" />
+      <action type="Rewrite" url="index.ts" />
     </rule>
   </rules>
 </rewrite> 

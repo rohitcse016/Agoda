@@ -16,8 +16,28 @@ function Hotels() {
   const [currentHotel, setCurrentHotel] = useState(null);
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
+  const filters = [];
+    const facility = {
+      facility: {
+        breakfast: filters.includes('breakfastIncluded') ? 1 : 0,
+        lunch_included: filters.includes('lunchIncluded') ? 1 : 0,
+        dinner_included: filters.includes('dinnerIncluded') ? 1 : 0,
+        parking: filters.includes('carPark') ? 1 : 0,
+        free_wifi: filters.includes('freeWifi') ? 1 : 0,
+        premium_wifi: filters.includes('premiumWifi') ? 1 : 0,
+        fitness_center_access: filters.includes('fitnessCenter') ? 1 : 0,
+        welcome_drink: filters.includes('welcomeDrink') ? 1 : 0,
+        pool_access: filters.includes('poolAccess') ? 1 : 0,
+        beverages: filters.includes('beverages') ? 1 : 0,
+        additional_info: '',
+        image_path: '',
+      },
+      minPrice: 0,
+      maxPrice: 999999,
+    }
 
-  const fetchHotels = async () => {
+  const fetchHotels = async (param = facility) => {
+    console.log(param);
     try {
       setLoading(true);
       const params = {
@@ -29,8 +49,12 @@ function Hotels() {
         state: 'any',
         country: 'any',
         address: 'any',
-        star_rating: 0
+        star_rating: 0,
+        facilitiesJson: JSON.stringify({ ...param?.facility, minPrice: param?.minPrice, maxPrice: param?.maxPrice }),
       };
+      console.log(params);
+
+
       const response = await ApiService.post('/hotel', params);
       setHotels(response.data ?? []);
     } catch (error) {
@@ -41,7 +65,7 @@ function Hotels() {
   };
 
   useEffect(() => {
-    fetchHotels();
+    fetchHotels(facility);
   }, []);
 
   const addHotel = async (hotel) => {
@@ -53,61 +77,60 @@ function Hotels() {
       };
       const formData = new FormData();
 
-// Basic Hotel Info
-formData.append('action', 'ADD'); // or 'ADD'
-formData.append('HotelID',  0); // Use 0 or null for ADD
-formData.append('name', values.name || '');
-formData.append('Description', values.description || '');
-formData.append('City', values.city || '');
-formData.append('State', values.state || '');
-formData.append('Country', values.country || '');
-formData.append('Address', values.address || '');
-formData.append('StarRating', values.star_rating || '0.0');
-formData.append('Hotel_Price', values.hotel_price || '0.00');
-
-console.log(values);
-const facilitiesArray = [
-  {
-    breakfast: values.facility?.breakfast ? 1 : 0,
-    lunch_included: values.facility?.lunch_included ? 1 : 0,
-    dinner_included: values.facility?.dinner_included ? 1 : 0,
-    parking: values.facility?.parking ? 1 : 0,
-    free_wifi: values.facility?.free_wifi ? 1 : 0,
-    premium_wifi: values.facility?.premium_wifi ? 1 : 0,
-    fitness_center_access: values.facility?.fitness_center_access ? 1 : 0,
-    welcome_drink: values.facility?.welcome_drink ? 1 : 0,
-    pool_access: values.facility?.pool_access ? 1 : 0,
-    beverages: values.facility?.beverages ? 1 : 0,
-    additional_info: values.facility?.additional_info || '',
-    image_path: '' // Optional: can be filled in if each facility has its own image
-  }
-];
-
-formData.append('FacilitiesJson', JSON.stringify(facilitiesArray));
-
-// Hotel Images JSON (paths/names only, assuming you handle uploads separately)
-// const hotelImagePaths = values.hotel_images?.map(img => `/uploads/hotel_images/${img.name}`) || [];
-// formData.append('ImagePathsJson', JSON.stringify(hotelImagePaths));
-
-
- if (values.hotel_images && values.hotel_images.length > 0) {
-      values.hotel_images.forEach((image, index) => {
-        // Check if image is a File object (new upload) or existing path (string)
-
-        formData.append(`hotel_images`, image); // Append the actual file
-        if (image instanceof File) {
-          console.log(image);
-        } else if (typeof image === 'string') {
-          // If it's a string, it might be an existing image path
-          formData.append(`existing_images[${index}]`, image);
-        }
-      });
-    }
+      // Basic Hotel Info
+      formData.append('action', 'ADD'); // or 'ADD'
+      formData.append('hotel_id', 0); // Use 0 or null for ADD
+      formData.append('name', values.name || '');
+      formData.append('description', values.description || '');
+      formData.append('city', values.city || '');
+      formData.append('state', values.state || '');
+      formData.append('country', values.country || '');
+      formData.append('address', values.address || '');
+      formData.append('star_rating', values.star_rating || '0.0');
+      formData.append('hotel_price', values.hotel_price || '0.00');
 
       console.log(values);
-       await ApiService.post('/hotel', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
+      const facilitiesArray = [
+        {
+          breakfast: values.facility?.breakfast ? 1 : 0,
+          lunch_included: values.facility?.lunch_included ? 1 : 0,
+          dinner_included: values.facility?.dinner_included ? 1 : 0,
+          parking: values.facility?.parking ? 1 : 0,
+          free_wifi: values.facility?.free_wifi ? 1 : 0,
+          premium_wifi: values.facility?.premium_wifi ? 1 : 0,
+          fitness_center_access: values.facility?.fitness_center_access ? 1 : 0,
+          welcome_drink: values.facility?.welcome_drink ? 1 : 0,
+          pool_access: values.facility?.pool_access ? 1 : 0,
+          beverages: values.facility?.beverages ? 1 : 0,
+          additional_info: values.facility?.additional_info || '',
+          image_path: '' // Optional: can be filled in if each facility has its own image
+        }
+      ];
+
+      formData.append('facilitiesJson', JSON.stringify(facilitiesArray));
+
+      // Hotel Images JSON (paths/names only, assuming you handle uploads separately)
+      // const hotelImagePaths = values.hotel_images?.map(img => `/uploads/hotel_images/${img.name}`) || [];
+      // formData.append('ImagePathsJson', JSON.stringify(hotelImagePaths));
+
+
+      if (values.hotel_images && values.hotel_images.length > 0) {
+        values.hotel_images.forEach((image, index) => {
+          // Check if image is a File object (new upload) or existing path (string)
+
+          formData.append(`hotel_images`, image); // Append the actual file
+          if (image instanceof File) {
+            console.log(image);
+          } else if (typeof image === 'string') {
+            // If it's a string, it might be an existing image path
+            formData.append(`existing_images[${index}]`, image);
+          }
+        });
+      }
+
+      await ApiService.post('/hotel', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
       await fetchHotels();
       message.success('Hotel added successfully');
     } catch (error) {
@@ -116,14 +139,57 @@ formData.append('FacilitiesJson', JSON.stringify(facilitiesArray));
     }
   };
 
-  const updateHotel = async (hotelId, updatedValues) => {
+  const updateHotel = async (hotelId, values) => {
     try {
-      const params = {
-        action: 'UPDATE',
-        hotel_id: hotelId,
-        ...updatedValues
-      };
-      await ApiService.post('/hotel', params);
+      const formData = new FormData();
+
+      // Basic Hotel Info
+      formData.append('action', 'UPDATE'); // or 'ADD'
+      formData.append('hotel_id', hotelId); // Use 0 or null for ADD
+      formData.append('name', values.name || '');
+      formData.append('description', values.description || '');
+      formData.append('city', values.city || '');
+      formData.append('state', values.state || '');
+      formData.append('country', values.country || '');
+      formData.append('address', values.address || '');
+      formData.append('starRating', values.star_rating || '0.0');
+      formData.append('hotel_Price', values.hotel_price || '0.00');
+
+      console.log(values);
+      const facilitiesArray = [
+        {
+          breakfast: values.facility?.breakfast ? 1 : 0,
+          lunch_included: values.facility?.lunch_included ? 1 : 0,
+          dinner_included: values.facility?.dinner_included ? 1 : 0,
+          parking: values.facility?.parking ? 1 : 0,
+          free_wifi: values.facility?.free_wifi ? 1 : 0,
+          premium_wifi: values.facility?.premium_wifi ? 1 : 0,
+          fitness_center_access: values.facility?.fitness_center_access ? 1 : 0,
+          welcome_drink: values.facility?.welcome_drink ? 1 : 0,
+          pool_access: values.facility?.pool_access ? 1 : 0,
+          beverages: values.facility?.beverages ? 1 : 0,
+          additional_info: values.facility?.additional_info || '',
+          image_path: '' // Optional: can be filled in if each facility has its own image
+        }
+      ];
+
+      formData.append('facilitiesJson', JSON.stringify(facilitiesArray));
+      if (values.hotel_images && values.hotel_images.length > 0) {
+        values.hotel_images.forEach((image, index) => {
+          formData.append(`hotel_images`, image);
+          if (image instanceof File) {
+            console.log(image);
+          } else if (typeof image === 'string') {
+            // If it's a string, it might be an existing image path
+            formData.append(`existing_images[${index}]`, image);
+          }
+        });
+      }
+
+
+      await ApiService.post('/hotel', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
       await fetchHotels();
       message.success('Hotel updated successfully');
     } catch (error) {
@@ -134,12 +200,12 @@ formData.append('FacilitiesJson', JSON.stringify(facilitiesArray));
 
   const deleteHotel = async (hotel) => {
     console.log(hotel);
-    
+
     try {
       const params = {
         action: 'DELETE',
         hotel_id: hotel.hotel_id,
-        name:hotel?.name,
+        name: hotel?.name,
       };
       await ApiService.post('/hotel', params);
       fetchHotels();
@@ -151,7 +217,7 @@ formData.append('FacilitiesJson', JSON.stringify(facilitiesArray));
     }
   };
 
-    const normFile = (e) => {
+  const normFile = (e) => {
     if (Array.isArray(e)) { return e; }
     return e?.fileList;
   };
@@ -171,7 +237,6 @@ formData.append('FacilitiesJson', JSON.stringify(facilitiesArray));
       beverages: values.facility.beverages ? 1 : 0,
       image_base64: values?.image_base64
     }];
-    console.log(values?.hotel_images, facilities);
     const finalPayload = {
       ...values,
       facilitiesJson: JSON.stringify(facilities),
@@ -179,14 +244,16 @@ formData.append('FacilitiesJson', JSON.stringify(facilitiesArray));
     };
 
     if (isEdit && currentHotel) {
+      console.log(currentHotel);
+
       updateHotel(currentHotel.hotel_id, finalPayload);
     } else {
       addHotel(finalPayload);
     }
+    form.resetFields();
     setShowModal(false);
     setIsEdit(false);
     setCurrentHotel(null);
-    form.resetFields();
   };
   return (
     <div>
@@ -199,10 +266,11 @@ formData.append('FacilitiesJson', JSON.stringify(facilitiesArray));
             type='primary'
             size='large'
             onClick={() => {
+
+              form.resetFields();
               setShowModal(true);
               setIsEdit(false);
               setCurrentHotel(null);
-              form.resetFields();
             }}
           >
             Create Hotel
@@ -212,19 +280,28 @@ formData.append('FacilitiesJson', JSON.stringify(facilitiesArray));
         size='large'
       >
         <Tabs.TabPane key="1" tab="Hotels List">
-          <div className="flex gap-4">
+          {/* Fixed/Sticky Top Search Bar (Optional) */}
+          <div className="sticky top-0 z-10 bg-white p-4 border-b">
+            {/* You can place a search bar or title here */}
+            <h2 className="text-lg font-semibold">Available Hotels</h2>
+          </div>
+
+          <div className="flex h-[calc(100vh-150px)] overflow-hidden">
             {/* Sidebar on the left */}
-            <div className="w-72 shrink-0">
+            <div className="w-72 p-4 border-r overflow-y-auto">
               <HotelFilterSidebar
                 onChange={(filters) => {
-                  // handle filter logic or pass to parent
-                  console.log('Filters changed:', filters);
+                  const finalPayload = {
+                    facilitiesJson: JSON.stringify(filters?.facility)
+                  };
+                  fetchHotels(filters);
+                  console.log('Filters changed:', finalPayload);
                 }}
               />
             </div>
 
             {/* Hotel list on the right */}
-            <div className="flex-1">
+            <div className="flex-1 p-4 overflow-y-auto">
               <HotelList
                 hotels={hotels}
                 editHotel={(hotel) => {
@@ -254,6 +331,7 @@ formData.append('FacilitiesJson', JSON.stringify(facilitiesArray));
             </div>
           </div>
         </Tabs.TabPane>
+
 
       </Tabs>
 
@@ -340,22 +418,22 @@ formData.append('FacilitiesJson', JSON.stringify(facilitiesArray));
           </Form.Item>
 
           <Form.Item
-        label="Hotel Images"
+            label="Hotel Images"
             name='hotel_images'
             valuePropName="value"
-        getValueFromEvent={normFile}
-        rules={[
-          {
-            required: false,
-            validator: (_, value) =>
-              value?.length > 0
-                ? Promise.resolve()
-                : Promise.reject('Please upload at least one image!')
-          }
-        ]}
-      >
-        <ImageUploadMultipart />
-      </Form.Item>
+            getValueFromEvent={normFile}
+            // rules={[
+            //   {
+            //     required: false,
+            //     validator: (_, value) =>
+            //       value?.length > 0
+            //         ? Promise.resolve()
+            //         : Promise.reject('Please upload at least one image!')
+            //   }
+            // ]}
+          >
+            <ImageUploadMultipart />
+          </Form.Item>
           <Button type="primary" loading={loading} htmlType='submit'>
             Save
           </Button>

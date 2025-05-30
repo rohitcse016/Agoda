@@ -49,7 +49,7 @@ export const manageHotels = async (req: Request, res: Response) => {
       country,
       address,
       star_rating,
-      hotel_price,
+      hotel_Price,
       facilitiesJson
     } = req.body;
 
@@ -59,12 +59,12 @@ export const manageHotels = async (req: Request, res: Response) => {
     const imagePaths = files?.map(file =>
       path.relative(path.join(__dirname, './..'), file.path)
     ) || [];
-    console.log(facilitiesJson);
     
 
     try {
       const conn = await getDbConnection();
-
+      
+      
       const [results]: any = await conn.query(
         `CALL ManageHotels(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`,
         [
@@ -76,14 +76,14 @@ export const manageHotels = async (req: Request, res: Response) => {
           state ?? null,
           country ?? null,
           address ?? null,
-          star_rating ?? null,
-          hotel_price ?? 0,
-          facilitiesJson ? JSON.stringify(facilitiesJson) : null,
+          star_rating ?? null, 
+          hotel_Price ?? 0,
+          facilitiesJson ? facilitiesJson : null,
           imagePaths.length ? JSON.stringify(imagePaths) : null
         ]
       );
-
       const data = action === "GET" ? results[0] : [];
+      
 
       res.status(200).json({
         success: true,
